@@ -21,7 +21,9 @@ class MyApp extends StatelessWidget {
           onPrimary: Colors.black,
           secondary: Colors.blue.shade300,
           onSecondary: Colors.black,
-          tertiary: const Color(0xFF4ECDC4), // Session / CTA accent (teal from refs)
+          tertiary: const Color(
+            0xFF4ECDC4,
+          ), // Session / CTA accent (teal from refs)
           surface: const Color(0xFF0D0D0D),
           onSurface: Colors.white,
           error: Colors.red.shade400,
@@ -35,9 +37,7 @@ class MyApp extends StatelessWidget {
         inputDecorationTheme: InputDecorationTheme(
           filled: true,
           fillColor: const Color(0xFF1A1A1A),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide(color: Colors.blue.shade900),

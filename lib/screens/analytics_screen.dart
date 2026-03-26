@@ -50,7 +50,11 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
       return const Center(child: CircularProgressIndicator());
     }
     final trend = _weeklyTrend ?? [];
-    final spots = trend.asMap().entries.map((e) => FlSpot(e.key.toDouble(), (1 - e.value.stressLevel) * 10)).toList();
+    final spots = trend
+        .asMap()
+        .entries
+        .map((e) => FlSpot(e.key.toDouble(), (1 - e.value.stressLevel) * 10))
+        .toList();
     final labels = trend.map((m) => DateFormat('EEE').format(m.date)).toList();
 
     return RefreshIndicator(
@@ -67,7 +71,9 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
             const SizedBox(height: 8),
             Text(
               'Weekly mood trend (higher = better). Data from Journal entries only.',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.blueGrey.shade300),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: Colors.blueGrey.shade300),
             ),
             const SizedBox(height: 24),
             if (trend.isNotEmpty) ...[
@@ -77,20 +83,43 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                   LineChartData(
                     gridData: FlGridData(show: true, drawVerticalLine: false),
                     titlesData: FlTitlesData(
-                      leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: true, reservedSize: 28, getTitlesWidget: (v, _) => Text(v.toInt().toString(), style: const TextStyle(color: Colors.blueGrey, fontSize: 10)))),
+                      leftTitles: AxisTitles(
+                        sideTitles: SideTitles(
+                          showTitles: true,
+                          reservedSize: 28,
+                          getTitlesWidget: (v, _) => Text(
+                            v.toInt().toString(),
+                            style: const TextStyle(
+                              color: Colors.blueGrey,
+                              fontSize: 10,
+                            ),
+                          ),
+                        ),
+                      ),
                       bottomTitles: AxisTitles(
                         sideTitles: SideTitles(
                           showTitles: true,
                           reservedSize: 28,
                           getTitlesWidget: (v, _) {
                             final i = v.toInt();
-                            if (i >= 0 && i < labels.length) return Text(labels[i], style: const TextStyle(color: Colors.blueGrey, fontSize: 10));
+                            if (i >= 0 && i < labels.length)
+                              return Text(
+                                labels[i],
+                                style: const TextStyle(
+                                  color: Colors.blueGrey,
+                                  fontSize: 10,
+                                ),
+                              );
                             return const Text('');
                           },
                         ),
                       ),
-                      topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                      rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                      topTitles: const AxisTitles(
+                        sideTitles: SideTitles(showTitles: false),
+                      ),
+                      rightTitles: const AxisTitles(
+                        sideTitles: SideTitles(showTitles: false),
+                      ),
                     ),
                     borderData: FlBorderData(show: false),
                     lineBarsData: [
@@ -100,7 +129,11 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                         color: Colors.blue.shade400,
                         barWidth: 2,
                         dotData: const FlDotData(show: true),
-                        belowBarData: BarAreaData(show: true, color: Colors.blue.withOpacity(0.1)),
+                        // ignore: deprecated_member_use
+                        belowBarData: BarAreaData(
+                          show: true,
+                          color: Colors.blue.withOpacity(0.1),
+                        ),
                       ),
                     ],
                   ),
@@ -114,33 +147,67 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                   padding: const EdgeInsets.all(20),
                   child: Text(
                     'No data yet. Write journal entries to build your insights.',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.blueGrey.shade400),
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Colors.blueGrey.shade400,
+                    ),
                   ),
                 ),
               ),
             const SizedBox(height: 24),
             if (_avgStress != null) ...[
-              Text('Average stress (7 days)', style: Theme.of(context).textTheme.titleSmall),
+              Text(
+                'Average stress (7 days)',
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
               const SizedBox(height: 4),
-              Text('${((_avgStress! * 100).round())}%', style: Theme.of(context).textTheme.headlineSmall?.copyWith(color: Colors.blue.shade300)),
+              Text(
+                '${((_avgStress! * 100).round())}%',
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  color: Colors.blue.shade300,
+                ),
+              ),
               const SizedBox(height: 4),
-              LinearProgressIndicator(value: _avgStress, backgroundColor: Colors.blue.shade900),
+              LinearProgressIndicator(
+                value: _avgStress,
+                backgroundColor: Colors.blue.shade900,
+              ),
               const SizedBox(height: 20),
             ],
             if (_topDistortion != null) ...[
-              Text('Most frequent distortion (30 days)', style: Theme.of(context).textTheme.titleSmall),
+              Text(
+                'Most frequent distortion (30 days)',
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
               const SizedBox(height: 4),
-              Text(_topDistortion!.replaceAll('_', ' '), style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.tealAccent)),
+              Text(
+                _topDistortion!.replaceAll('_', ' '),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(color: Colors.tealAccent),
+              ),
               const SizedBox(height: 20),
             ],
             if (_improvement != null) ...[
-              Text('Improvement', style: Theme.of(context).textTheme.titleSmall),
+              Text(
+                'Improvement',
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
               const SizedBox(height: 4),
               Card(
                 color: const Color(0xFF1A1A1A),
                 child: ListTile(
-                  leading: Icon(_improvement!.stressImproved ? Icons.trending_down : Icons.info_outline, color: _improvement!.stressImproved ? Colors.green : Colors.blueGrey),
-                  title: Text(_improvement!.message, style: Theme.of(context).textTheme.bodyMedium),
+                  leading: Icon(
+                    _improvement!.stressImproved
+                        ? Icons.trending_down
+                        : Icons.info_outline,
+                    color: _improvement!.stressImproved
+                        ? Colors.green
+                        : Colors.blueGrey,
+                  ),
+                  title: Text(
+                    _improvement!.message,
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
                 ),
               ),
             ],

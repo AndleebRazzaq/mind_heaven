@@ -12,7 +12,9 @@ class StorageService {
     final prefs = await SharedPreferences.getInstance();
     final json = prefs.getStringList(_keyCheckIns);
     if (json == null) return [];
-    return json.map((e) => _MoodEntryFromJson(jsonDecode(e) as Map<String, dynamic>)).toList();
+    return json
+        .map((e) => _MoodEntryFromJson(jsonDecode(e) as Map<String, dynamic>))
+        .toList();
   }
 
   Future<void> addCheckIn(MoodEntry entry) async {
@@ -29,7 +31,11 @@ class StorageService {
     final prefs = await SharedPreferences.getInstance();
     final json = prefs.getStringList(_keyJournalEntries);
     if (json == null) return [];
-    return json.map((e) => _journalEntryFromJson(jsonDecode(e) as Map<String, dynamic>)).toList();
+    return json
+        .map(
+          (e) => _journalEntryFromJson(jsonDecode(e) as Map<String, dynamic>),
+        )
+        .toList();
   }
 
   Future<void> addJournalEntry(JournalEntry entry) async {
@@ -43,28 +49,29 @@ class StorageService {
   }
 
   static Map<String, dynamic> _moodEntryToJson(MoodEntry e) => {
-        'id': e.id,
-        'dateTime': e.dateTime.toIso8601String(),
-        'moodLabel': e.moodLabel,
-        'stressLevel': e.stressLevel,
-      };
+    'id': e.id,
+    'dateTime': e.dateTime.toIso8601String(),
+    'moodLabel': e.moodLabel,
+    'stressLevel': e.stressLevel,
+  };
 
+  // ignore: non_constant_identifier_names
   static MoodEntry _MoodEntryFromJson(Map<String, dynamic> m) => MoodEntry(
-        id: m['id'] as String,
-        dateTime: DateTime.parse(m['dateTime'] as String),
-        moodLabel: m['moodLabel'] as String,
-        stressLevel: (m['stressLevel'] as num).toDouble(),
-      );
+    id: m['id'] as String,
+    dateTime: DateTime.parse(m['dateTime'] as String),
+    moodLabel: m['moodLabel'] as String,
+    stressLevel: (m['stressLevel'] as num).toDouble(),
+  );
 
   static Map<String, dynamic> _journalEntryToJson(JournalEntry e) => {
-        'id': e.id,
-        'dateTime': e.dateTime.toIso8601String(),
-        'content': e.content,
-        'distortion': e.detectedDistortion?.name,
-        'reframe': e.reframe,
-        'plantSuggestion': e.plantSuggestion,
-        'moodLabel': e.moodLabel,
-      };
+    'id': e.id,
+    'dateTime': e.dateTime.toIso8601String(),
+    'content': e.content,
+    'distortion': e.detectedDistortion?.name,
+    'reframe': e.reframe,
+    'plantSuggestion': e.plantSuggestion,
+    'moodLabel': e.moodLabel,
+  };
 
   static JournalEntry _journalEntryFromJson(Map<String, dynamic> m) {
     DistortionType? d;
