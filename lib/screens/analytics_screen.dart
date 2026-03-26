@@ -3,7 +3,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
 import '../services/analytics_service.dart';
 
-/// Analytics: weekly mood trend, stress average, top distortion, improvement (from stored data).
+/// Analytics: journal-driven weekly mood trend, stress average, top distortion, improvement.
 class AnalyticsScreen extends StatefulWidget {
   const AnalyticsScreen({super.key});
 
@@ -66,7 +66,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
             ),
             const SizedBox(height: 8),
             Text(
-              'Weekly mood trend (higher = better). Data from Check-In & Journal.',
+              'Weekly mood trend (higher = better). Data from Journal entries only.',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.blueGrey.shade300),
             ),
             const SizedBox(height: 24),
@@ -113,7 +113,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                 child: Padding(
                   padding: const EdgeInsets.all(20),
                   child: Text(
-                    'No data yet. Use Check-In and Journal to build your analytics.',
+                    'No data yet. Write journal entries to build your insights.',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.blueGrey.shade400),
                   ),
                 ),
