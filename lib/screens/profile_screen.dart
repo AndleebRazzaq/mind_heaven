@@ -27,22 +27,26 @@ class ProfileScreen extends StatelessWidget {
                       color: _accentBlue,
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.person_rounded, size: 44, color: Colors.white),
+                    child: const Icon(
+                      Icons.person_rounded,
+                      size: 44,
+                      color: Colors.white,
+                    ),
                   ),
                   const SizedBox(height: 16),
                   Text(
                     'Alex',
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     'alex@mindheaven.com',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Colors.blueGrey.shade400,
-                        ),
+                      color: Colors.blueGrey.shade400,
+                    ),
                   ),
                   const SizedBox(height: 12),
                   FilledButton.icon(
@@ -50,7 +54,10 @@ class ProfileScreen extends StatelessWidget {
                     style: FilledButton.styleFrom(
                       backgroundColor: _accentBlue,
                       foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 10,
+                      ),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(20),
                       ),
@@ -65,9 +72,9 @@ class ProfileScreen extends StatelessWidget {
           const SizedBox(height: 24),
           Text(
             'Settings',
-            style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  color: Colors.blueGrey.shade400,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleSmall?.copyWith(color: Colors.blueGrey.shade400),
           ),
           const SizedBox(height: 8),
           _SettingsTile(
@@ -93,9 +100,9 @@ class ProfileScreen extends StatelessWidget {
           const SizedBox(height: 20),
           Text(
             'Account',
-            style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  color: Colors.blueGrey.shade400,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleSmall?.copyWith(color: Colors.blueGrey.shade400),
           ),
           const SizedBox(height: 8),
           _SettingsTile(
@@ -138,6 +145,7 @@ class _SettingsTile extends StatelessWidget {
       child: ListTile(
         onTap: onTap ?? () {},
         leading: CircleAvatar(
+          // ignore: deprecated_member_use
           backgroundColor: ProfileScreen._accentBlue.withOpacity(0.3),
           child: Icon(icon, color: ProfileScreen._accentBlue, size: 22),
         ),
@@ -149,10 +157,17 @@ class _SettingsTile extends StatelessWidget {
                 children: [
                   Text(
                     value,
-                    style: TextStyle(color: Colors.blueGrey.shade300, fontSize: 13),
+                    style: TextStyle(
+                      color: Colors.blueGrey.shade300,
+                      fontSize: 13,
+                    ),
                   ),
                   const SizedBox(width: 4),
-                  const Icon(Icons.chevron_right_rounded, color: Colors.blueGrey, size: 20),
+                  const Icon(
+                    Icons.chevron_right_rounded,
+                    color: Colors.blueGrey,
+                    size: 20,
+                  ),
                 ],
               ),
       ),

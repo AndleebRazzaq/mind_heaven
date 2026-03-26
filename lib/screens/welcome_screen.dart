@@ -26,17 +26,17 @@ class WelcomeScreen extends StatelessWidget {
                 Text(
                   'Welcome',
                   style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
                 ),
                 const SizedBox(height: 12),
                 Text(
                   'Don\'t let yesterday take up too much of today.',
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: Colors.blueGrey.shade300,
-                      ),
+                    color: Colors.blueGrey.shade300,
+                  ),
                 ),
                 const Spacer(),
                 Container(
@@ -45,6 +45,7 @@ class WelcomeScreen extends StatelessWidget {
                   child: Icon(
                     Icons.self_improvement_rounded,
                     size: 120,
+                    // ignore: deprecated_member_use
                     color: const Color(0xFF4ECDC4).withOpacity(0.6),
                   ),
                 ),
@@ -55,7 +56,8 @@ class WelcomeScreen extends StatelessWidget {
                     onPressed: () {
                       Navigator.of(context).push(
                         MaterialPageRoute(
-                          builder: (context) => const AuthScreen(initialLogin: true),
+                          builder: (context) =>
+                              const AuthScreen(initialLogin: true),
                         ),
                       );
                     },
@@ -75,7 +77,8 @@ class WelcomeScreen extends StatelessWidget {
                   onPressed: () {
                     Navigator.of(context).push(
                       MaterialPageRoute(
-                        builder: (context) => const AuthScreen(initialLogin: false),
+                        builder: (context) =>
+                            const AuthScreen(initialLogin: false),
                       ),
                     );
                   },

@@ -24,10 +24,12 @@ class _SplashScreenState extends State<SplashScreen> {
     final prefs = await SharedPreferences.getInstance();
     final seenOnboarding = prefs.getBool('onboarding_seen') ?? false;
     if (seenOnboarding) {
+      // ignore: use_build_context_synchronously
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (context) => const WelcomeScreen()),
       );
     } else {
+      // ignore: use_build_context_synchronously
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (context) => const OnboardingScreen()),
       );
@@ -43,10 +45,7 @@ class _SplashScreenState extends State<SplashScreen> {
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF0D0D0D),
-              Color(0xFF1A1A2E),
-            ],
+            colors: [Color(0xFF0D0D0D), Color(0xFF1A1A2E)],
           ),
         ),
         child: SafeArea(
@@ -61,28 +60,33 @@ class _SplashScreenState extends State<SplashScreen> {
                   borderRadius: BorderRadius.circular(24),
                   boxShadow: [
                     BoxShadow(
+                      // ignore: deprecated_member_use
                       color: const Color(0xFF4ECDC4).withOpacity(0.4),
                       blurRadius: 24,
                       spreadRadius: 2,
                     ),
                   ],
                 ),
-                child: const Icon(Icons.psychology, size: 52, color: Colors.black),
+                child: const Icon(
+                  Icons.psychology,
+                  size: 52,
+                  color: Colors.black,
+                ),
               ),
               const SizedBox(height: 24),
               Text(
                 'Mind Heaven',
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
               ),
               const SizedBox(height: 8),
               Text(
                 'Your mental wellness companion',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Colors.blueGrey.shade400,
-                    ),
+                  color: Colors.blueGrey.shade400,
+                ),
               ),
             ],
           ),

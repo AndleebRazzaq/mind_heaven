@@ -18,16 +18,16 @@ class DashboardScreen extends StatelessWidget {
           Text(
             'Hello!',
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
           ),
           const SizedBox(height: 6),
           Text(
             'How are you feeling today?',
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: Colors.blueGrey.shade300,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodyLarge?.copyWith(color: Colors.blueGrey.shade300),
           ),
           const SizedBox(height: 24),
           _MoodFlowCard(),
@@ -35,9 +35,9 @@ class DashboardScreen extends StatelessWidget {
           Text(
             'AI Insights',
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w600,
-                ),
+              color: Colors.white,
+              fontWeight: FontWeight.w600,
+            ),
           ),
           const SizedBox(height: 10),
           _InsightCard(
@@ -55,9 +55,9 @@ class DashboardScreen extends StatelessWidget {
           Text(
             'Start a session',
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w600,
-                ),
+              color: Colors.white,
+              fontWeight: FontWeight.w600,
+            ),
           ),
           const SizedBox(height: 10),
           _SessionCtaCard(),
@@ -70,7 +70,14 @@ class DashboardScreen extends StatelessWidget {
 class _MoodFlowCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final moods = ['Calm', 'Reflective', 'Anxious', 'Calm', 'Low', 'Reflective'];
+    final moods = [
+      'Calm',
+      'Reflective',
+      'Anxious',
+      'Calm',
+      'Low',
+      'Reflective',
+    ];
     return Card(
       color: const Color(0xFF1A1A1A),
       child: Padding(
@@ -80,11 +87,17 @@ class _MoodFlowCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(Icons.show_chart_rounded, color: DashboardScreen.sessionAccent, size: 20),
+                Icon(
+                  Icons.show_chart_rounded,
+                  color: DashboardScreen.sessionAccent,
+                  size: 20,
+                ),
                 const SizedBox(width: 8),
                 Text(
                   'Mood flow',
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(color: Colors.white70),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleSmall?.copyWith(color: Colors.white70),
                 ),
               ],
             ),
@@ -94,14 +107,19 @@ class _MoodFlowCard extends StatelessWidget {
               child: ListView.separated(
                 scrollDirection: Axis.horizontal,
                 itemCount: moods.length,
-                separatorBuilder: (_, __) => const SizedBox(width: 8),
+                separatorBuilder: (_, _) => const SizedBox(width: 8),
                 itemBuilder: (context, i) {
                   return Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
                     decoration: BoxDecoration(
+                      // ignore: deprecated_member_use
                       color: DashboardScreen.sessionAccent.withOpacity(0.2),
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
+                        // ignore: deprecated_member_use
                         color: DashboardScreen.sessionAccent.withOpacity(0.5),
                       ),
                     ),
@@ -131,7 +149,11 @@ class _InsightCard extends StatelessWidget {
   final String body;
   final IconData icon;
 
-  const _InsightCard({required this.title, required this.body, required this.icon});
+  const _InsightCard({
+    required this.title,
+    required this.body,
+    required this.icon,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -142,8 +164,17 @@ class _InsightCard extends StatelessWidget {
           backgroundColor: Colors.blue.shade900,
           child: Icon(icon, color: Colors.blue.shade300, size: 22),
         ),
-        title: Text(title, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w500)),
-        subtitle: Text(body, style: TextStyle(color: Colors.blueGrey.shade300, fontSize: 13)),
+        title: Text(
+          title,
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        subtitle: Text(
+          body,
+          style: TextStyle(color: Colors.blueGrey.shade300, fontSize: 13),
+        ),
       ),
     );
   }
@@ -169,6 +200,7 @@ class _SessionCtaCard extends StatelessWidget {
                 width: 56,
                 height: 56,
                 decoration: BoxDecoration(
+                  // ignore: deprecated_member_use
                   color: DashboardScreen.sessionAccent.withOpacity(0.25),
                   borderRadius: BorderRadius.circular(14),
                 ),
@@ -186,16 +218,16 @@ class _SessionCtaCard extends StatelessWidget {
                     Text(
                       'Check-in session',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
-                          ),
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       'Voice or text — we detect stress & mood and suggest a calming step.',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Colors.blueGrey.shade400,
-                          ),
+                        color: Colors.blueGrey.shade400,
+                      ),
                     ),
                   ],
                 ),
@@ -207,7 +239,11 @@ class _SessionCtaCard extends StatelessWidget {
                   color: DashboardScreen.sessionAccent,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(Icons.arrow_forward_rounded, color: Colors.black, size: 24),
+                child: const Icon(
+                  Icons.arrow_forward_rounded,
+                  color: Colors.black,
+                  size: 24,
+                ),
               ),
             ],
           ),

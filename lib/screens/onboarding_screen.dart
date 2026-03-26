@@ -17,13 +17,15 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   static const _pages = [
     _OnboardingPage(
       title: 'Find your peace',
-      subtitle: 'Track mood and stress with simple check-ins. Voice or text — we\'re here.',
+      subtitle:
+          'Track mood and stress with simple check-ins. Voice or text — we\'re here.',
       icon: Icons.favorite_rounded,
       color: Color(0xFF4ECDC4),
     ),
     _OnboardingPage(
       title: 'CBT-based journaling',
-      subtitle: 'AI feedback on your thoughts. Spot distortions, get reframes and coping steps.',
+      subtitle:
+          'AI feedback on your thoughts. Spot distortions, get reframes and coping steps.',
       icon: Icons.menu_book_rounded,
       color: Color(0xFF6C9BCF),
     ),
@@ -81,6 +83,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                             width: 140,
                             height: 140,
                             decoration: BoxDecoration(
+                              // ignore: deprecated_member_use
                               color: p.color.withOpacity(0.2),
                               shape: BoxShape.circle,
                             ),
@@ -90,7 +93,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           Text(
                             p.title,
                             textAlign: TextAlign.center,
-                            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                            style: Theme.of(context).textTheme.headlineSmall
+                                ?.copyWith(
                                   fontWeight: FontWeight.bold,
                                   color: Colors.white,
                                 ),
@@ -99,9 +103,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           Text(
                             p.subtitle,
                             textAlign: TextAlign.center,
-                            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                  color: Colors.blueGrey.shade300,
-                                ),
+                            style: Theme.of(context).textTheme.bodyLarge
+                                ?.copyWith(color: Colors.blueGrey.shade300),
                           ),
                         ],
                       ),
@@ -132,12 +135,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 child: SizedBox(
                   width: double.infinity,
                   child: FilledButton(
-                    onPressed: _currentPage == _pages.length - 1 ? _finish : () {
-                      _pageController.nextPage(
-                        duration: const Duration(milliseconds: 300),
-                        curve: Curves.easeInOut,
-                      );
-                    },
+                    onPressed: _currentPage == _pages.length - 1
+                        ? _finish
+                        : () {
+                            _pageController.nextPage(
+                              duration: const Duration(milliseconds: 300),
+                              curve: Curves.easeInOut,
+                            );
+                          },
                     style: FilledButton.styleFrom(
                       backgroundColor: const Color(0xFF4ECDC4),
                       foregroundColor: Colors.black,
@@ -146,7 +151,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         borderRadius: BorderRadius.circular(14),
                       ),
                     ),
-                    child: Text(_currentPage == _pages.length - 1 ? 'Get started' : 'Next'),
+                    child: Text(
+                      _currentPage == _pages.length - 1
+                          ? 'Get started'
+                          : 'Next',
+                    ),
                   ),
                 ),
               ),
