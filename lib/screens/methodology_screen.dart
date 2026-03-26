@@ -31,7 +31,10 @@ class MethodologyScreen extends StatelessWidget {
                 _FlowStep('2', 'NLP + audio analysis → mood & stress level'),
                 _FlowStep('3', 'Calming micro-intervention shown'),
                 _FlowStep('4', 'Journal: User writes free text'),
-                _FlowStep('5', 'Distortion classifier → cognitive distortion type'),
+                _FlowStep(
+                  '5',
+                  'Distortion classifier → cognitive distortion type',
+                ),
                 _FlowStep('6', 'CBT reframing + plant suggestion'),
                 _FlowStep('7', 'Analytics: weekly/monthly mood trends'),
               ],
@@ -87,7 +90,12 @@ class _Section extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title, style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.blue.shade300)),
+          Text(
+            title,
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(color: Colors.blue.shade300),
+          ),
           const SizedBox(height: 8),
           child,
         ],
@@ -113,11 +121,19 @@ class _FlowStep extends StatelessWidget {
             width: 24,
             height: 24,
             alignment: Alignment.center,
-            decoration: BoxDecoration(color: Colors.blue.shade700, shape: BoxShape.circle),
-            child: Text(step, style: const TextStyle(fontSize: 12, color: Colors.white)),
+            decoration: BoxDecoration(
+              color: Colors.blue.shade700,
+              shape: BoxShape.circle,
+            ),
+            child: Text(
+              step,
+              style: const TextStyle(fontSize: 12, color: Colors.white),
+            ),
           ),
           const SizedBox(width: 10),
-          Expanded(child: Text(text, style: Theme.of(context).textTheme.bodyMedium)),
+          Expanded(
+            child: Text(text, style: Theme.of(context).textTheme.bodyMedium),
+          ),
         ],
       ),
     );
