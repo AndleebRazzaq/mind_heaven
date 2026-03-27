@@ -1,31 +1,10 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/journal_entry.dart';
-import '../models/mood_entry.dart';
 
 /// Persists check-ins and journal entries for analytics.
 class StorageService {
-  static const _keyCheckIns = 'mind_heaven_check_ins';
   static const _keyJournalEntries = 'mind_heaven_journal_entries';
-
-  Future<List<MoodEntry>> getCheckIns() async {
-    final prefs = await SharedPreferences.getInstance();
-    final json = prefs.getStringList(_keyCheckIns);
-    if (json == null) return [];
-    return json
-        .map((e) => _MoodEntryFromJson(jsonDecode(e) as Map<String, dynamic>))
-        .toList();
-  }
-
-  Future<void> addCheckIn(MoodEntry entry) async {
-    final list = await getCheckIns();
-    list.add(entry);
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setStringList(
-      _keyCheckIns,
-      list.map((e) => jsonEncode(_moodEntryToJson(e))).toList(),
-    );
-  }
 
   Future<List<JournalEntry>> getJournalEntries() async {
     final prefs = await SharedPreferences.getInstance();
@@ -47,21 +26,6 @@ class StorageService {
       list.map((e) => jsonEncode(_journalEntryToJson(e))).toList(),
     );
   }
-
-  static Map<String, dynamic> _moodEntryToJson(MoodEntry e) => {
-    'id': e.id,
-    'dateTime': e.dateTime.toIso8601String(),
-    'moodLabel': e.moodLabel,
-    'stressLevel': e.stressLevel,
-  };
-
-  // ignore: non_constant_identifier_names
-  static MoodEntry _MoodEntryFromJson(Map<String, dynamic> m) => MoodEntry(
-    id: m['id'] as String,
-    dateTime: DateTime.parse(m['dateTime'] as String),
-    moodLabel: m['moodLabel'] as String,
-    stressLevel: (m['stressLevel'] as num).toDouble(),
-  );
 
   static Map<String, dynamic> _journalEntryToJson(JournalEntry e) => {
     'id': e.id,

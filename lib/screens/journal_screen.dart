@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../models/journal_entry.dart';
 import '../models/cbt_intervention.dart';
-import '../core/intervention/intervention_builder.dart';
-import '../services/storage_service.dart';
+import '../presentation/providers/journal_provider.dart';
 
 /// CBT Journal: Layer 1 (distortion + emotion) → Layer 2 (CBT mapping) → Layer 3 (intervention).
 class JournalScreen extends StatefulWidget {
@@ -26,11 +26,6 @@ class JournalScreen extends StatefulWidget {
 
 class _JournalScreenState extends State<JournalScreen> {
   final TextEditingController _contentController = TextEditingController();
-  final InterventionBuilder _interventionBuilder = InterventionBuilder();
-  final StorageService _storage = StorageService();
-  CBTIntervention? _lastIntervention;
-  DistortionType? _lastDistortion;
-  bool _loading = false;
 
   @override
   void dispose() {
@@ -41,31 +36,14 @@ class _JournalScreenState extends State<JournalScreen> {
   Future<void> _onSubmit() async {
     final content = _contentController.text.trim();
     if (content.isEmpty) return;
-    setState(() => _loading = true);
-    try {
-      final result = await _interventionBuilder.buildForJournal(content);
-      final entry = JournalEntry(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        dateTime: DateTime.now(),
-        content: content,
-        detectedDistortion: result.distortionType,
-        reframe: result.intervention.reframeGuidance,
-        plantSuggestion: result.intervention.plantSuggestion,
-        moodLabel: result.emotionLabel,
-      );
-      await _storage.addJournalEntry(entry);
-      setState(() {
-        _lastIntervention = result.intervention;
-        _lastDistortion = result.distortionType;
-        _loading = false;
-      });
-    } catch (_) {
-      setState(() => _loading = false);
-    }
+    await context.read<JournalProvider>().analyze(content);
   }
 
   @override
   Widget build(BuildContext context) {
+    final provider = context.watch<JournalProvider>();
+    final CBTIntervention? _lastIntervention = provider.intervention;
+    final bool _loading = provider.isLoading;
     return SingleChildScrollView(
       padding: const EdgeInsets.all(20),
       child: Column(
@@ -95,7 +73,11 @@ class _JournalScreenState extends State<JournalScreen> {
           ),
           if (_lastIntervention != null) ...[
             const SizedBox(height: 24),
-            _InterventionCard(intervention: _lastIntervention!, distortionType: _lastDistortion),
+            _InterventionCard(intervention: _lastIntervention!),
+          ],
+          if (provider.error != null) ...[
+            const SizedBox(height: 12),
+            Text(provider.error!, style: const TextStyle(color: Colors.redAccent)),
           ],
         ],
       ),
@@ -105,9 +87,8 @@ class _JournalScreenState extends State<JournalScreen> {
 
 class _InterventionCard extends StatelessWidget {
   final CBTIntervention intervention;
-  final DistortionType? distortionType;
 
-  const _InterventionCard({required this.intervention, this.distortionType});
+  const _InterventionCard({required this.intervention, DistortionType? distortionType});
 
   @override
   Widget build(BuildContext context) {
@@ -132,6 +113,18 @@ class _InterventionCard extends StatelessWidget {
             Text('Explanation:', style: Theme.of(context).textTheme.titleSmall),
             const SizedBox(height: 4),
             Text(intervention.distortionExplanation, style: Theme.of(context).textTheme.bodyMedium),
+            const SizedBox(height: 12),
+            Text('Emotional acknowledgment:', style: Theme.of(context).textTheme.titleSmall),
+            const SizedBox(height: 4),
+            Text(intervention.emotionalAcknowledgment, style: Theme.of(context).textTheme.bodyMedium),
+            const SizedBox(height: 12),
+            Text('Safety mode:', style: Theme.of(context).textTheme.titleSmall),
+            const SizedBox(height: 4),
+            Text(intervention.interventionMode, style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.orangeAccent)),
+            const SizedBox(height: 12),
+            Text('CBT technique:', style: Theme.of(context).textTheme.titleSmall),
+            const SizedBox(height: 4),
+            Text(intervention.cbtTechnique, style: Theme.of(context).textTheme.bodyMedium),
             const SizedBox(height: 12),
             Text('CBT reframe:', style: Theme.of(context).textTheme.titleSmall),
             const SizedBox(height: 4),

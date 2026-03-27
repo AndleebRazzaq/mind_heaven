@@ -3,7 +3,10 @@ import 'storage_service.dart';
 
 /// Analytics: weekly mood trend, stress average, top distortion, improvement.
 class AnalyticsService {
-  final StorageService _storage = StorageService();
+  final StorageService _storage;
+
+  AnalyticsService({StorageService? storage})
+      : _storage = storage ?? StorageService();
 
   Future<List<JournalEntry>> getJournalEntries() => _storage.getJournalEntries();
 

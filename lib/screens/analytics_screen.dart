@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
-import '../services/analytics_service.dart';
+import 'package:provider/provider.dart';
+import '../presentation/providers/insights_provider.dart';
 
 /// Analytics: journal-driven weekly mood trend, stress average, top distortion, improvement.
 class AnalyticsScreen extends StatefulWidget {
@@ -12,40 +13,15 @@ class AnalyticsScreen extends StatefulWidget {
 }
 
 class _AnalyticsScreenState extends State<AnalyticsScreen> {
-  final AnalyticsService _analytics = AnalyticsService();
-  List<MoodDataPoint>? _weeklyTrend;
-  double? _avgStress;
-  String? _topDistortion;
-  ImprovementSummary? _improvement;
-  bool _loading = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _load();
-  }
-
-  Future<void> _load() async {
-    setState(() => _loading = true);
-    try {
-      final trend = await _analytics.getWeeklyMoodTrend();
-      final avg = await _analytics.getAverageStress();
-      final top = await _analytics.getTopDistortion();
-      final improvement = await _analytics.getImprovementSummary();
-      setState(() {
-        _weeklyTrend = trend;
-        _avgStress = avg;
-        _topDistortion = top;
-        _improvement = improvement;
-        _loading = false;
-      });
-    } catch (_) {
-      setState(() => _loading = false);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
+    final provider = context.watch<InsightsProvider>();
+    final _weeklyTrend = provider.weeklyTrend;
+    final _avgStress = provider.averageStress;
+    final _topDistortion = provider.topDistortion;
+    final _improvement = provider.improvement;
+    final _loading = provider.isLoading;
+
     if (_loading) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -58,7 +34,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
     final labels = trend.map((m) => DateFormat('EEE').format(m.date)).toList();
 
     return RefreshIndicator(
-      onRefresh: _load,
+      onRefresh: () => context.read<InsightsProvider>().load(),
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -102,7 +78,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                           reservedSize: 28,
                           getTitlesWidget: (v, _) {
                             final i = v.toInt();
-                            if (i >= 0 && i < labels.length)
+                            if (i >= 0 && i < labels.length) {
                               return Text(
                                 labels[i],
                                 style: const TextStyle(
@@ -110,6 +86,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                                   fontSize: 10,
                                 ),
                               );
+                            }
                             return const Text('');
                           },
                         ),
@@ -132,6 +109,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                         // ignore: deprecated_member_use
                         belowBarData: BarAreaData(
                           show: true,
+                          // ignore: deprecated_member_use
                           color: Colors.blue.withOpacity(0.1),
                         ),
                       ),
