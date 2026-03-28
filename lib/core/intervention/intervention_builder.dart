@@ -10,10 +10,12 @@ class JournalInterventionResult {
   final CBTIntervention intervention;
   final DistortionType distortionType;
   final String emotionLabel;
+  final double emotionConfidence;
   JournalInterventionResult({
     required this.intervention,
     required this.distortionType,
     required this.emotionLabel,
+    required this.emotionConfidence,
   });
 }
 
@@ -41,6 +43,7 @@ class InterventionBuilder {
       distortionResult.distortionType,
       highStress: highStress,
       moodLabel: emotionResult.emotion.label,
+      emotionConfidence: emotionResult.confidence,
       stressLevel: stressLevel,
       confidence: distortionResult.confidence,
     );
@@ -48,6 +51,7 @@ class InterventionBuilder {
       intervention: intervention,
       distortionType: distortionResult.distortionType,
       emotionLabel: emotionResult.emotion.label,
+      emotionConfidence: emotionResult.confidence,
     );
   }
 

@@ -1,5 +1,6 @@
 import '../../models/journal_entry.dart';
 import '../../models/cbt_intervention.dart';
+import 'plant_suggestion_database.dart';
 
 /// Layer 2: Rule-based CBT mapping. One distortion → one technique + exercise + plant.
 /// Clinically aligned; no free-form AI generation.
@@ -146,29 +147,13 @@ class CBTMapping {
     return 'Thank you for expressing your thoughts honestly.';
   }
 
-  static String _plantByEmotion(String? moodLabel) {
-    final mood = (moodLabel ?? '').toLowerCase();
-    if (mood.contains('anxiety')) {
-      return 'Lavender - associated with calming sensory environments.';
-    }
-    if (mood.contains('sad')) {
-      return 'Peace Lily - often linked with soothing indoor ambience.';
-    }
-    if (mood.contains('anger')) {
-      return 'Snake Plant - grounding presence and easy maintenance.';
-    }
-    if (mood.contains('fatigue') || mood.contains('tired')) {
-      return 'Rosemary - associated with alertness support.';
-    }
-    return 'Pothos - low-maintenance greenery that supports a calm space.';
-  }
-
   /// Returns full CBT intervention with confidence-aware safety logic.
   /// >70% direct CBT correction, 50-70% reflective questioning, <50% emotional validation.
   static CBTIntervention getIntervention(
     DistortionType distortionType, {
     bool highStress = false,
     String? moodLabel,
+    double? emotionConfidence,
     double? stressLevel,
     double confidence = 0.0,
   }) {
@@ -215,12 +200,13 @@ class CBTMapping {
       reframeGuidance: safeReframe,
       copingExerciseTitle: safeExerciseTitle,
       copingExerciseDescription: safeExerciseDesc,
-      plantSuggestion: _plantByEmotion(moodLabel),
+      plantSuggestion: PlantSuggestionDatabase.suggestionForEmotion(moodLabel),
       suggestBreathing: highStress,
       breathingTechnique: highStress
           ? '4-7-8 breathing: inhale 4s, hold 7s, exhale 8s. Repeat twice.'
           : null,
       moodLabel: moodLabel,
+      emotionConfidence: emotionConfidence,
       stressLevel: stressLevel,
       detectedDistortionLabel: distortionType == DistortionType.unknown
           ? null

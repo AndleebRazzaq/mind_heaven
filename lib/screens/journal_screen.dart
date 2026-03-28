@@ -26,6 +26,24 @@ class JournalScreen extends StatefulWidget {
 
 class _JournalScreenState extends State<JournalScreen> {
   final TextEditingController _contentController = TextEditingController();
+  late int _suggestionIndex;
+
+  static const List<String> _suggestionPrompts = [
+    'How was your day? Share a moment that made you feel proud, anxious, or upset.',
+    'Think about a part of your day that was challenging - what went through your mind?',
+    'Write about anything that made you feel frustrated, worried, or stressed today.',
+    'Note any thought that keeps replaying in your head, even small ones.',
+    'Notice a positive moment and what thought accompanied it.',
+    'Write about a situation where you felt anxious - what did you tell yourself?',
+    'Describe a challenge you faced and how you reacted.',
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    final now = DateTime.now();
+    _suggestionIndex = (now.year + now.month + now.day) % _suggestionPrompts.length;
+  }
 
   @override
   void dispose() {
@@ -57,6 +75,35 @@ class _JournalScreenState extends State<JournalScreen> {
           Text(
             'Write freely. We detect cognitive distortions and suggest CBT reframes, coping exercises, and plant tips.',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.blueGrey.shade300),
+          ),
+          const SizedBox(height: 16),
+          Card(
+            color: const Color(0xFF1A1A1A),
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Icon(Icons.tips_and_updates_outlined, color: Colors.amberAccent),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      "Here's a suggestion: ${_suggestionPrompts[_suggestionIndex]}",
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                  ),
+                  IconButton(
+                    tooltip: 'New suggestion',
+                    onPressed: () {
+                      setState(() {
+                        _suggestionIndex = (_suggestionIndex + 1) % _suggestionPrompts.length;
+                      });
+                    },
+                    icon: const Icon(Icons.refresh_rounded),
+                  ),
+                ],
+              ),
+            ),
           ),
           const SizedBox(height: 24),
           TextField(
@@ -108,6 +155,12 @@ class _InterventionCard extends StatelessWidget {
               ),
               if (intervention.confidence != null)
                 Text('Confidence: ${(intervention.confidence! * 100).round()}%', style: Theme.of(context).textTheme.bodySmall),
+            if (intervention.moodLabel != null) ...[
+              const SizedBox(height: 6),
+              Text('Detected emotion: ${intervention.moodLabel}', style: Theme.of(context).textTheme.bodySmall),
+            ],
+            if (intervention.emotionConfidence != null)
+              Text('Emotion confidence: ${(intervention.emotionConfidence! * 100).round()}%', style: Theme.of(context).textTheme.bodySmall),
               const SizedBox(height: 12),
             ],
             Text('Explanation:', style: Theme.of(context).textTheme.titleSmall),

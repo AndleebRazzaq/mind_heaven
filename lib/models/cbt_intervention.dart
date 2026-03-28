@@ -11,6 +11,7 @@ class CBTIntervention {
   final bool suggestBreathing;
   final String? breathingTechnique;
   final String? moodLabel;
+  final double? emotionConfidence;
   final double? stressLevel;
   final String? detectedDistortionLabel;
   final double? confidence;
@@ -27,6 +28,7 @@ class CBTIntervention {
     this.suggestBreathing = false,
     this.breathingTechnique,
     this.moodLabel,
+    this.emotionConfidence,
     this.stressLevel,
     this.detectedDistortionLabel,
     this.confidence,
