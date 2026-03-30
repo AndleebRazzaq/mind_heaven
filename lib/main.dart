@@ -26,7 +26,7 @@ class MyApp extends StatelessWidget {
       storage: storage,
       localBuilder: InterventionBuilder(),
       remote: remote,
-      useRemote: false, // Set true when FastAPI is ready
+      useRemote: true, // FastAPI integration enabled
     );
 
     return MultiProvider(

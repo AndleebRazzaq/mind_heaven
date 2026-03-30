@@ -132,7 +132,7 @@ class CBTMapping {
 
   static String _acknowledgeEmotion(String? moodLabel) {
     final mood = (moodLabel ?? '').toLowerCase();
-    if (mood.contains('anxiety')) {
+    if (mood.contains('anxiety') || mood.contains('fear')) {
       return 'It makes sense that this feels overwhelming right now.';
     }
     if (mood.contains('sad')) {
@@ -141,7 +141,7 @@ class CBTMapping {
     if (mood.contains('anger')) {
       return 'Your frustration is valid and worth understanding carefully.';
     }
-    if (mood.contains('calm')) {
+    if (mood.contains('calm') || mood.contains('joy')) {
       return 'You are showing good awareness and regulation.';
     }
     return 'Thank you for expressing your thoughts honestly.';
@@ -201,6 +201,8 @@ class CBTMapping {
       copingExerciseTitle: safeExerciseTitle,
       copingExerciseDescription: safeExerciseDesc,
       plantSuggestion: PlantSuggestionDatabase.suggestionForEmotion(moodLabel),
+      plantImageUrl: PlantSuggestionDatabase.imageUrlForEmotion(moodLabel),
+      plantReferenceUrl: PlantSuggestionDatabase.referenceUrlForEmotion(moodLabel),
       suggestBreathing: highStress,
       breathingTechnique: highStress
           ? '4-7-8 breathing: inhale 4s, hold 7s, exhale 8s. Repeat twice.'

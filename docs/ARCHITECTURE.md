@@ -1,212 +1,142 @@
-# CBT-Based Emotion-Aware AI Journal & Stress Detection — System Architecture
+# Mind Heaven — System Architecture (Current)
 
-## 1. Core Concept
+## 1. Core concept
 
-This application is a **CBT-based multimodal mental wellness system** that:
+Mind Heaven is a **CBT-based, journal-first** mental wellness app that:
 
-- Detects **mood** and **stress** from **text** and **voice**
-- Uses **NLP** for cognitive distortion detection and emotion classification
-- Uses **voice-based stress detection** (audio features)
-- Applies **structured CBT intervention mapping** (rule-based, not free-form AI)
-- Delivers **coping exercises**, **plant suggestions**, and **breathing techniques**
+- Detects **cognitive distortions** and **emotional tone** from **journal text**
+- Applies a **rule-based CBT mapping** (confidence-aware safety modes)
+- Delivers a structured intervention card (explanation, reframe, exercise, optional breathing, **plant suggestion**)
 
-It is **preventive**, **AI-driven**, and **psychologically structured** — not a generic chatbot.
+**AI for detection, rules for therapy** — not a generic chatbot.
 
 ---
 
-## 2. Three-Layer Architecture
+## 2. Three-layer architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                        LAYER 3: INTERVENTION LAYER                           │
-│  • Explanation of distortion  • Reframed thought  • CBT exercise             │
-│  • Plant recommendation       • Breathing (if high stress)                   │
+│                     LAYER 3: INTERVENTION LAYER (Flutter / API)              │
+│  Explanation • Reframe • Exercise • Plant suggestion • Breathing (optional) │
 └─────────────────────────────────────────────────────────────────────────────┘
                                         ▲
-                                        │ outputs
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                     LAYER 2: CBT LOGIC ENGINE (Rule-Based)                  │
-│  Distortion → CBT Technique → Coping Exercise  (structured mapping table)   │
+│                  LAYER 2: CBT LOGIC ENGINE (Rule-based, deterministic)        │
+│  Flutter: cbt_mapping.dart  │  API: cbt_engine.py                            │
 └─────────────────────────────────────────────────────────────────────────────┘
                                         ▲
-                                        │ distortion, emotion, stress
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                      LAYER 1: DETECTION LAYER (AI Models)                   │
-│  Journal: Cognitive Distortion Classifier + Emotion Classifier (text only)  │
-│  Check-In: Text→Emotion + Voice→Stress → Weighted Fusion (70% text, 30% voice)│
+│                     LAYER 1: DETECTION (ML)                                  │
+│  Distortion: fine-tuned classifier (numeric label + confidence)              │
+│  Emotion: pretrained Hugging Face text-classification (label + confidence)    │
 └─────────────────────────────────────────────────────────────────────────────┘
                                         ▲
-                                        │ text, voice
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                              USER INPUT                                      │
-│  Journal Screen: text only  │  Check-In Screen: text + voice                 │
+│                     USER INPUT — Journal text only                           │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 3. Layer 1 — Detection Layer
+## 3. Layer 1 — Detection
 
-### 3.1 Journal Screen (Text-Only)
+### Journal (text)
 
-| Component | Role | Implementation path |
-|-----------|------|---------------------|
-| **Cognitive Distortion Classifier** | Predicts distortion type + confidence | Fine-tuned DistilBERT (or equivalent) on 1000–1500 labeled samples. **App**: mock/API stub until model is deployed. |
-| **Emotion Classifier** | Predicts emotional tone (e.g. anxiety, sadness) | Same pipeline or separate model. **App**: mock returns emotion label + confidence. |
+| Output | Source (typical) |
+|--------|-------------------|
+| Distortion **label**, **confidence**, optional **class id** | Your trained model (API) or mock heuristics (local) |
+| Emotion **label**, **confidence** | Hugging Face pretrained model (API) or mock (local) |
 
-**Output example:** `Distortion: Catastrophizing`, `Emotion: Anxiety`, `Confidence: 87%`
+Semantic classification is the target for production; mocks exist for UI development without GPUs.
 
-Semantic understanding is required — not keyword matching — for production.
+---
 
-### 3.2 Check-In Screen (Multimodal)
+## 4. Layer 2 — CBT engine
 
-| Input | Model | Output |
-|-------|--------|--------|
-| **Text** | Emotion classifier | Mood label + confidence |
-| **Voice** | Stress classifier (e.g. MFCC + CNN/LSTM) | Stress score (e.g. 0–1) |
-| **Fusion** | Weighted combination | **70% text, 30% voice** → final stress level + mood |
+- **Flutter:** Full distortion-type table in `lib/core/cbt_engine/cbt_mapping.dart` (`DistortionType` enum).
+- **API:** `backend/app/services/cbt_engine.py` produces API-safe structured text using distortion label + confidence + emotion.
 
-Voice is used for **stress intensity only**, not for cognitive distortion.
+Principles: clinical alignment, fixed mappings, no uncontrolled generative therapy text.
 
-**Output example:** `Stress Level: High`, `Mood: Anxious`
+---
 
-### 3.3 Fusion Formula (Check-In)
+## 5. Layer 3 — Intervention
+
+Combines detection outputs + CBT row into a single **`CBTIntervention`** (and journal persistence). Plant lines come from **`PlantSuggestionDatabase`** (app) / **`plant_database.py`** (backend).
+
+---
+
+## 6. Application navigation
 
 ```
-stress_final = 0.7 * stress_from_text + 0.3 * stress_from_voice
-mood_final   = mood_from_text  (voice can modulate stress only)
+Splash → Onboarding → Welcome → Auth → Main App (bottom navigation)
 ```
 
----
-
-## 4. Layer 2 — CBT Logic Engine (Rule-Based)
-
-This is the **psychological core**. All therapeutic content is driven by a **fixed mapping table**, not free-form generation.
-
-### 4.1 Mapping Structure
-
-| Distortion | CBT Technique | Coping Exercise |
-|------------|----------------|-----------------|
-| Catastrophizing | Evidence examination | Write 3 realistic outcomes |
-| Overgeneralization | Reframing | Identify exceptions |
-| Mind Reading | Cognitive restructuring | Ask for proof |
-| ... | ... | ... |
-
-### 4.2 Design Principles
-
-- **Clinical alignment** with CBT theory
-- **Structured intervention** — same distortion → same technique family
-- **Controlled response** — no random or unvalidated AI text
-
-The engine takes **distortion type** (and optionally **stress level**) and returns:
-
-- CBT technique name
-- Reframe guidance text
-- Structured coping exercise
-- Plant suggestion (environmental psychology)
-- Whether to suggest breathing (e.g. if stress is high)
+| Tab | Role |
+|-----|------|
+| **Journal** | Text → analysis → intervention → save entry |
+| **Insights** | Analytics from stored journal entries |
+| **Learn CBT** | Educational content |
+| **Profile** | Settings / profile |
 
 ---
 
-## 5. Layer 3 — Intervention Layer
-
-From Layer 2 output and stress level, the app presents:
-
-1. **Explanation** of the detected distortion
-2. **Reframed thought** guidance
-3. **Structured CBT exercise** (e.g. “Write 3 realistic outcomes”)
-4. **Plant recommendation** (e.g. lavender for calming)
-5. **Breathing technique** (e.g. 4-7-8) **if stress is high**
-
-Example: **Distortion = Catastrophizing**, **Stress = High**
-
-→ Explain distortion → Reframe → Journaling exercise → Lavender suggestion → 4-7-8 breathing
-
----
-
-## 6. Model Strategy (Academic)
-
-| Aspect | Choice | Rationale |
-|--------|--------|-----------|
-| **Distortion / Emotion** | Supervised ML; fine-tune DistilBERT | Balance of quality and feasibility for FYP |
-| **Dataset** | 1000–1500 labeled samples | Sufficient for evaluation and thesis |
-| **Evaluation** | Accuracy, F1-score, confusion matrix | Standard and defensible |
-| **CBT content** | Rule-based mapping | Keeps therapy theoretically consistent and publishable |
-
-**Hybrid architecture:** **AI for detection**, **rules for therapy**.
-
----
-
-## 7. Application Structure (Screens)
-
-```
-Splash → Onboarding → Login / Sign-Up → Main App (Bottom Nav)
-```
-
-| Screen | Role |
-|--------|------|
-| **Check-In** | Text + voice → emotion + stress (fusion) → intervention (mood + stress + breathing if high) |
-| **Journal** | Text → distortion + emotion → CBT engine → full intervention (explanation, reframe, exercise, plant, breathing if needed) |
-| **Analytics** | Weekly mood trends, stress averages, most frequent distortion, emotional improvement |
-| **Profile** | User and app settings |
-
----
-
-## 8. Data Flow Summary
-
-**Journal:**  
-`User text` → **Detection (distortion + emotion)** → **CBT Engine (technique + exercise + plant)** → **Intervention (explanation, reframe, exercise, plant, breathing)** → UI.
-
-**Check-In:**  
-`User text + voice` → **Text emotion** + **Voice stress** → **Fusion (70/30)** → **Intervention (mood, stress, breathing if high)** → UI.
-
-**Analytics:**  
-Stored **check-ins** and **journal entries** → aggregate by week → mood trends, stress averages, top distortion, improvement metrics → Dashboard UI.
-
----
-
-## 9. File Layout (App)
+## 7. Clean architecture (Flutter)
 
 ```
 lib/
 ├── main.dart
+├── domain/repositories/       # JournalRepository contract
+├── data/
+│   ├── repositories/          # JournalRepositoryImpl (local vs remote)
+│   └── remote/                # JournalRemoteDataSource → FastAPI
+├── presentation/providers/     # JournalProvider, InsightsProvider
 ├── core/
-│   ├── detection/           # Layer 1
-│   │   ├── emotion_classifier.dart
-│   │   ├── distortion_classifier.dart
-│   │   ├── voice_stress_detector.dart
-│   │   └── fusion_service.dart
-│   ├── cbt_engine/          # Layer 2
-│   │   └── cbt_mapping.dart
-│   └── intervention/        # Layer 3
-│       └── intervention_builder.dart
+│   ├── config/                 # API_BASE_URL (dart-define)
+│   ├── network/                # ApiClient
+│   ├── detection/              # Local mock classifiers (optional / dev)
+│   ├── cbt_engine/             # cbt_mapping.dart, plant_suggestion_database.dart
+│   └── intervention/         # intervention_builder.dart
 ├── models/
-│   ├── emotion_type.dart
-│   ├── journal_entry.dart   # DistortionType enum + JournalEntry
-│   ├── cbt_intervention.dart
-│   ├── mood_entry.dart
-│   └── check_in_result.dart
-├── services/
-│   ├── analytics_service.dart
-│   └── storage_service.dart
+├── services/                   # storage, analytics
 └── screens/
-    ├── splash_screen.dart
-    ├── onboarding_screen.dart
-    ├── welcome_screen.dart
-    ├── auth_screen.dart
-    ├── home_shell.dart
-    ├── dashboard_screen.dart
-    ├── check_in_screen.dart
-    ├── journal_screen.dart
-    ├── analytics_screen.dart
-    ├── profile_screen.dart
-    └── methodology_screen.dart
 ```
 
-## 10. App Model (Data Flow)
+**Backend (separate deployable):**
 
-- **Check-In:** User text/voice → `FusionService.fuse()` (70% text, 30% voice) → `InterventionBuilder.buildForCheckIn()` → `CBTIntervention` (mood, stress, reframe, breathing if high, plant) → UI; `MoodEntry` saved via `StorageService`.
-- **Journal:** User text → `InterventionBuilder.buildForJournal()` (calls `DistortionClassifier`, `EmotionClassifier`, `CBTMapping.getIntervention()`) → `JournalInterventionResult` (intervention + distortion + emotion) → UI; `JournalEntry` saved via `StorageService`.
-- **Analytics:** `StorageService` (check-ins + journal entries) → `AnalyticsService` (weekly trend, average stress, top distortion, improvement) → Dashboard UI.
+```
+backend/app/
+├── main.py
+├── schemas.py
+├── config.py
+└── services/
+    ├── distortion_service.py   # Transformers folder + id→label map
+    ├── emotion_service.py      # Hugging Face pipeline
+    ├── cbt_engine.py
+    └── plant_database.py
+```
 
-This document is the single source of truth for the **system architecture** and the **3-layer + app structure** of the project.
+---
+
+## 8. Data flow summary
+
+**Journal (local):**  
+Text → `InterventionBuilder` → mock distortion/emotion → `CBTMapping.getIntervention` → UI → `StorageService`.
+
+**Journal (remote):**  
+Text → `POST /analyze/journal` → JSON → `CBTIntervention` → UI → `StorageService`.
+
+**Insights:**  
+Stored entries → `AnalyticsService` → `InsightsProvider` → UI.
+
+---
+
+## 9. Model strategy (academic)
+
+| Component | Approach |
+|-----------|----------|
+| **Distortion** | Your fine-tuned classifier; outputs class index + probability |
+| **Emotion** | Published pretrained HF model + light label normalization |
+| **CBT content** | Rule-based; defensible and consistent |
+
+This document reflects the **current** codebase (journal-first, optional FastAPI, no multimodal check-in in app).

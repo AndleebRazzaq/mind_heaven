@@ -43,3 +43,6 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Local ML model weights (too large for regular git)
+backend/cbt_distortion_model/model.safetensors

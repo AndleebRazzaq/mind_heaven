@@ -1,4 +1,4 @@
-﻿# Mind Heaven – Final FYP Idea Flow (Refined)
+# Mind Heaven – Final FYP Idea Flow (Refined)
 
 ## Project Title
 **CBT-Based AI Journaling & Cognitive Distortion Detection System**
@@ -39,16 +39,16 @@ This makes the project:
 **Input:** Journal text only
 
 1. **Cognitive Distortion Classifier (main contribution)**
-   - Transformer fine-tuning (DistilBERT/BERT)
-   - Multi-class classification
-   - Output: distortion label + confidence
+   - Your fine-tuned transformer (exported as a Hugging Face–compatible folder)
+   - Multi-class classification: **numeric class id** (argmax) + **confidence** (softmax); id→name via `distortion_label_map.json` or model `id2label`
+   - Backend exposes `distortion_label_id`, `detected_distortion_label`, and `confidence`
 
 2. **Emotion Classifier (context model)**
-   - Pretrained emotion model (e.g., GoEmotions-style)
-   - Output: emotion label + confidence
+   - Pretrained Hugging Face text-classification model (default: `j-hartmann/emotion-english-distilroberta-base`)
+   - Output: normalized emotion label + confidence for UI, plants, and Insights
 
 **Example output:**
-- Distortion: Catastrophizing (82%)
+- Distortion: Magnification / Catastrophizing (82%), label id `0`
 - Emotion: Anxiety (74%)
 
 ---

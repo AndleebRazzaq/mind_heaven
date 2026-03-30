@@ -17,7 +17,8 @@ abstract class DistortionClassifier {
   Future<DistortionResult> classify(String text);
 }
 
-/// Mock implementation. Replace with real model (API or on-device).
+/// Mock / heuristic implementation for local-only mode. Production distortion ML is intended
+/// via FastAPI (`DISTORTION_MODEL_DIR` + label map); use `useRemote: true` in `main.dart`.
 class MockDistortionClassifier implements DistortionClassifier {
   @override
   Future<DistortionResult> classify(String text) async {

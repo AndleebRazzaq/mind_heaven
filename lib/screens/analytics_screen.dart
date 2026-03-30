@@ -16,16 +16,16 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<InsightsProvider>();
-    final _weeklyTrend = provider.weeklyTrend;
-    final _avgStress = provider.averageStress;
-    final _topDistortion = provider.topDistortion;
-    final _improvement = provider.improvement;
-    final _loading = provider.isLoading;
+    final weeklyTrend = provider.weeklyTrend;
+    final avgStress = provider.averageStress;
+    final topDistortion = provider.topDistortion;
+    final improvement = provider.improvement;
+    final loading = provider.isLoading;
 
-    if (_loading) {
+    if (loading) {
       return const Center(child: CircularProgressIndicator());
     }
-    final trend = _weeklyTrend ?? [];
+    final trend = weeklyTrend;
     final spots = trend
         .asMap()
         .entries
@@ -132,40 +132,40 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                 ),
               ),
             const SizedBox(height: 24),
-            if (_avgStress != null) ...[
+            if (avgStress != null) ...[
               Text(
                 'Average stress (7 days)',
                 style: Theme.of(context).textTheme.titleSmall,
               ),
               const SizedBox(height: 4),
               Text(
-                '${((_avgStress! * 100).round())}%',
+                '${((avgStress * 100).round())}%',
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                   color: Colors.blue.shade300,
                 ),
               ),
               const SizedBox(height: 4),
               LinearProgressIndicator(
-                value: _avgStress,
+                value: avgStress,
                 backgroundColor: Colors.blue.shade900,
               ),
               const SizedBox(height: 20),
             ],
-            if (_topDistortion != null) ...[
+            if (topDistortion != null) ...[
               Text(
                 'Most frequent distortion (30 days)',
                 style: Theme.of(context).textTheme.titleSmall,
               ),
               const SizedBox(height: 4),
               Text(
-                _topDistortion!.replaceAll('_', ' '),
+                topDistortion.replaceAll('_', ' '),
                 style: Theme.of(
                   context,
                 ).textTheme.titleMedium?.copyWith(color: Colors.tealAccent),
               ),
               const SizedBox(height: 20),
             ],
-            if (_improvement != null) ...[
+            if (improvement != null) ...[
               Text(
                 'Improvement',
                 style: Theme.of(context).textTheme.titleSmall,
@@ -175,15 +175,15 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                 color: const Color(0xFF1A1A1A),
                 child: ListTile(
                   leading: Icon(
-                    _improvement!.stressImproved
+                    improvement.stressImproved
                         ? Icons.trending_down
                         : Icons.info_outline,
-                    color: _improvement!.stressImproved
+                    color: improvement.stressImproved
                         ? Colors.green
                         : Colors.blueGrey,
                   ),
                   title: Text(
-                    _improvement!.message,
+                    improvement.message,
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),
                 ),

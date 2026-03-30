@@ -82,8 +82,10 @@ So you get BLoC-like separation without extra BLoC boilerplate.
 Backend lives in `backend/` with:
 
 - `app/main.py` - API entrypoint
-- `app/services/` - replaceable model/services layer
-- `app/schemas.py` - request/response contracts
+- `app/services/distortion_service.py` - loads **your** fine-tuned model from `DISTORTION_MODEL_DIR` (Transformers layout); outputs **class id**, **label**, **confidence**
+- `app/services/emotion_service.py` - **Hugging Face** pretrained text-classification (`EMOTION_HF_MODEL`, default English emotion DistilRoBERTa)
+- `app/services/cbt_engine.py` + `plant_database.py` - rule-based intervention copy
+- `app/schemas.py` - request/response contracts (includes optional `distortion_label_id`)
 
 Keeping backend in a separate `backend/` folder is a **good and production-friendly approach**:
 - clear separation of concerns (mobile vs API)
@@ -97,9 +99,13 @@ Keeping backend in a separate `backend/` folder is a **good and production-frien
 cd backend
 python -m venv .venv
 .venv\Scripts\activate
+pip install torch
 pip install -r requirements.txt
+set DISTORTION_MODEL_DIR=D:\path\to\your\model
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
+
+For quick UI testing without weights: `set DISTORTION_USE_MOCK=1` and `set EMOTION_USE_MOCK=1`.
 
 ### Flutter <-> FastAPI wiring
 
