@@ -30,6 +30,16 @@ class _FakeAnalyticsServiceSuccess extends AnalyticsService {
       message: 'Improved',
     );
   }
+
+  @override
+  Future<CBTUsageSummary> getCbtUsageSummary() async {
+    return const CBTUsageSummary(
+      totalEntries: 3,
+      reframeCompletionRate: 1,
+      behaviorPromptRate: 0.66,
+      structuredReframeRate: 1,
+    );
+  }
 }
 
 class _FakeAnalyticsServiceError extends AnalyticsService {

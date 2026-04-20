@@ -6,7 +6,11 @@ import 'package:mind_heaven/presentation/providers/journal_provider.dart';
 
 class _FakeSuccessJournalRepository implements JournalRepository {
   @override
-  Future<JournalAnalysisResult> analyzeAndSave(String text) async {
+  Future<JournalAnalysisResult> analyzeAndSave(
+    String text, {
+    double? userReportedIntensity,
+    double? stressBefore,
+  }) async {
     final intervention = CBTIntervention(
       distortionExplanation: 'test',
       emotionalAcknowledgment: 'ack',
@@ -30,13 +34,29 @@ class _FakeSuccessJournalRepository implements JournalRepository {
     );
     return JournalAnalysisResult(intervention: intervention, entry: entry);
   }
+
+  @override
+  Future<void> savePostReflectionRating({
+    required String entryId,
+    required double stressAfter,
+  }) async {}
 }
 
 class _FakeErrorJournalRepository implements JournalRepository {
   @override
-  Future<JournalAnalysisResult> analyzeAndSave(String text) async {
+  Future<JournalAnalysisResult> analyzeAndSave(
+    String text, {
+    double? userReportedIntensity,
+    double? stressBefore,
+  }) async {
     throw Exception('repo failed');
   }
+
+  @override
+  Future<void> savePostReflectionRating({
+    required String entryId,
+    required double stressAfter,
+  }) async {}
 }
 
 void main() {

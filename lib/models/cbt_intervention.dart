@@ -18,11 +18,16 @@ class CBTIntervention {
   final String? detectedDistortionLabel;
   final String? distortionDescription;
   final double? confidence;
+
   /// Numeric class id from the distortion classifier when using the remote API.
   final int? distortionLabelId;
   final String? certainty;
   final String? feedbackType;
+  final String? coachingTone;
   final double? emotionIntensity;
+  final String? intensityBand;
+  final String? distortionInsightLine;
+  final String? emotionalSupportMessage;
   final String? microInterventionTitle;
   final String? microInterventionPrompt;
   final double? riskScore;
@@ -31,6 +36,21 @@ class CBTIntervention {
   final String? safetyMessage;
   final double? combinedConfidence;
   final String? confidenceLevel;
+
+  /// Layered API copy: validation / pattern prompts (optional for local fallback).
+  final String? responseValidation;
+  final String? responsePatternAwareness;
+  final List<String> cognitivePrompts;
+  final String? balancedReframeSuggestion;
+  final String? eventSummary;
+  final List<String> coreBeliefs;
+  final String? distortionLogicLine;
+  final String? balancedAlternative;
+  final String? behavioralShiftPrompt;
+  final String? reframeGenerationMode;
+  final List<String> reframeValidationErrors;
+  final String? reframeFallbackReason;
+  final String? reframePolicyVersion;
 
   const CBTIntervention({
     required this.distortionExplanation,
@@ -54,7 +74,11 @@ class CBTIntervention {
     this.distortionLabelId,
     this.certainty,
     this.feedbackType,
+    this.coachingTone,
     this.emotionIntensity,
+    this.intensityBand,
+    this.distortionInsightLine,
+    this.emotionalSupportMessage,
     this.microInterventionTitle,
     this.microInterventionPrompt,
     this.riskScore,
@@ -63,5 +87,18 @@ class CBTIntervention {
     this.safetyMessage,
     this.combinedConfidence,
     this.confidenceLevel,
+    this.responseValidation,
+    this.responsePatternAwareness,
+    this.cognitivePrompts = const [],
+    this.balancedReframeSuggestion,
+    this.eventSummary,
+    this.coreBeliefs = const [],
+    this.distortionLogicLine,
+    this.balancedAlternative,
+    this.behavioralShiftPrompt,
+    this.reframeGenerationMode,
+    this.reframeValidationErrors = const [],
+    this.reframeFallbackReason,
+    this.reframePolicyVersion,
   });
 }
