@@ -1,12 +1,13 @@
-import 'package:flutter/foundation.dart';
-import '../../domain/repositories/journal_repository.dart';
+import 'package:riverpod/riverpod.dart';
+
+import '../../app/app_providers.dart';
 import '../../models/cbt_intervention.dart';
 import '../../models/journal_entry.dart';
 
-class JournalProvider extends ChangeNotifier {
-  final JournalRepository _repository;
+const _unset = Object();
 
-  JournalProvider(this._repository);
+final journalControllerProvider =
+    NotifierProvider<JournalController, JournalState>(JournalController.new);
 
   bool isLoading = false;
   String? error;

@@ -1,8 +1,10 @@
-import 'package:flutter_test/flutter_test.dart';
+import 'package:mind_heaven/app/app_providers.dart';
 import 'package:mind_heaven/domain/repositories/journal_repository.dart';
 import 'package:mind_heaven/models/cbt_intervention.dart';
 import 'package:mind_heaven/models/journal_entry.dart';
 import 'package:mind_heaven/presentation/providers/journal_provider.dart';
+import 'package:riverpod/riverpod.dart';
+import 'package:test/test.dart';
 
 class _FakeSuccessJournalRepository implements JournalRepository {
   @override
@@ -60,24 +62,42 @@ class _FakeErrorJournalRepository implements JournalRepository {
 }
 
 void main() {
-  test('JournalProvider analyze success updates intervention', () async {
-    final provider = JournalProvider(_FakeSuccessJournalRepository());
+  test('JournalController analyze success updates intervention', () async {
+    final container = ProviderContainer(
+      overrides: [
+        journalRepositoryProvider.overrideWithValue(
+          _FakeSuccessJournalRepository(),
+        ),
+      ],
+    );
+    addTearDown(container.dispose);
 
-    await provider.analyze('I will fail this always');
+    await container
+        .read(journalControllerProvider.notifier)
+        .analyze('I will fail this always');
 
-    expect(provider.isLoading, false);
-    expect(provider.error, isNull);
-    expect(provider.intervention, isNotNull);
-    expect(provider.intervention?.plantSuggestion, 'Lavender');
+    final state = container.read(journalControllerProvider);
+    expect(state.isLoading, false);
+    expect(state.error, isNull);
+    expect(state.intervention, isNotNull);
+    expect(state.intervention?.plantSuggestion, 'Lavender');
   });
 
-  test('JournalProvider analyze failure sets error', () async {
-    final provider = JournalProvider(_FakeErrorJournalRepository());
+  test('JournalController analyze failure sets error', () async {
+    final container = ProviderContainer(
+      overrides: [
+        journalRepositoryProvider.overrideWithValue(
+          _FakeErrorJournalRepository(),
+        ),
+      ],
+    );
+    addTearDown(container.dispose);
 
-    await provider.analyze('text');
+    await container.read(journalControllerProvider.notifier).analyze('text');
 
-    expect(provider.isLoading, false);
-    expect(provider.intervention, isNull);
-    expect(provider.error, isNotNull);
+    final state = container.read(journalControllerProvider);
+    expect(state.isLoading, false);
+    expect(state.intervention, isNull);
+    expect(state.error, isNotNull);
   });
 }

@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../presentation/providers/insights_provider.dart';
 import '../services/analytics_service.dart';
 
 /// Analytics: journal-driven weekly mood trend, stress average, top distortion, improvement.
-class AnalyticsScreen extends StatefulWidget {
+class AnalyticsScreen extends ConsumerStatefulWidget {
   const AnalyticsScreen({super.key});
 
   @override
-  State<AnalyticsScreen> createState() => _AnalyticsScreenState();
+  ConsumerState<AnalyticsScreen> createState() => _AnalyticsScreenState();
 }
 
 class _AnalyticsScreenState extends State<AnalyticsScreen> {
@@ -69,7 +69,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
     final labels = trend.map((m) => DateFormat('EEE').format(m.date)).toList();
 
     return RefreshIndicator(
-      onRefresh: () => context.read<InsightsProvider>().load(),
+      onRefresh: () => ref.read(insightsControllerProvider.notifier).load(),
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
