@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'onboarding_screen.dart';
-import 'welcome_screen.dart';
+import '../app/router.dart';
+import '../features/auth/data/repositories/session_repository_impl.dart';
+import '../features/onboarding/data/repositories/onboarding_state_repository_impl.dart';
+import '../features/splash/presentation/splash_controller.dart';
+import '../services/auth_service.dart';
 
 /// First screen: logo and app name, then route to onboarding or welcome.
 class SplashScreen extends StatefulWidget {
@@ -12,6 +14,8 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
+  static const String _logoAsset = 'assets/logo/reframed_logo_full.png';
+
   @override
   void initState() {
     super.initState();
@@ -21,71 +25,40 @@ class _SplashScreenState extends State<SplashScreen> {
   Future<void> _navigate() async {
     await Future.delayed(const Duration(milliseconds: 2200));
     if (!mounted) return;
-    final prefs = await SharedPreferences.getInstance();
-    final seenOnboarding = prefs.getBool('onboarding_seen') ?? false;
-    if (seenOnboarding) {
-      // ignore: use_build_context_synchronously
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const WelcomeScreen()),
-      );
-    } else {
-      // ignore: use_build_context_synchronously
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const OnboardingScreen()),
-      );
+    final controller = SplashController(
+      sessionRepository: SessionRepositoryImpl(AuthService()),
+      onboardingRepository: OnboardingStateRepositoryImpl(),
+    );
+    final target = await controller.resolveTarget();
+    if (!mounted) return;
+    switch (target) {
+      case SplashTarget.onboarding:
+        Navigator.of(context).pushReplacementNamed(AppRoutes.onboarding);
+        break;
+      case SplashTarget.welcome:
+        Navigator.of(context).pushReplacementNamed(AppRoutes.welcome);
+        break;
+      case SplashTarget.shell:
+        Navigator.of(context).pushReplacementNamed(AppRoutes.shell);
+        break;
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        width: double.infinity,
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Color(0xFF0D0D0D), Color(0xFF1A1A2E)],
-          ),
-        ),
-        child: SafeArea(
+      backgroundColor: const Color(0xFF0A0A0A), // Black background
+      body: SafeArea(
+        child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Container(
-                width: 100,
-                height: 100,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF4ECDC4),
-                  borderRadius: BorderRadius.circular(24),
-                  boxShadow: [
-                    BoxShadow(
-                      // ignore: deprecated_member_use
-                      color: const Color(0xFF4ECDC4).withOpacity(0.4),
-                      blurRadius: 24,
-                      spreadRadius: 2,
-                    ),
-                  ],
-                ),
-                child: const Icon(
-                  Icons.psychology,
-                  size: 52,
-                  color: Colors.black,
-                ),
-              ),
-              const SizedBox(height: 24),
-              Text(
-                'Mind Heaven',
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Your mental wellness companion',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.blueGrey.shade400,
+              Image.asset(
+                _logoAsset,
+                width: 240,
+                fit: BoxFit.contain,
+                errorBuilder: (context, error, stackTrace) => const Icon(
+                  Icons.psychology, size: 90, color: Color(0xFFB4C6FC)
                 ),
               ),
             ],

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "867065112691",
+    "project_id": "reframed-cd2cf",
+    "storage_bucket": "reframed-cd2cf.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:867065112691:android:c5fc3bf4dff775e3c52206",
+        "android_client_info": {
+          "package_name": "com.example.mind_heaven"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDC11Ok-ob-g_7gLmYnAJVql6IeCYmE4mQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
