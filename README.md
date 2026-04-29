@@ -52,7 +52,7 @@ Main App Tabs:
 - Structured feedback object delivered to UI
 - Includes environmental suggestion and optional calming guidance
 
-## Clean Architecture + Provider
+## Clean Architecture + Riverpod
 
 The app now follows a clean, replaceable setup:
 
@@ -60,22 +60,23 @@ The app now follows a clean, replaceable setup:
 - `lib/data/repositories/` - repository implementations
 - `lib/data/remote/` - API data sources
 - `lib/core/network/` - API client
-- `lib/presentation/providers/` - `ChangeNotifier` state management
+- `lib/app/app_providers.dart` - dependency providers overridden at app startup
+- `lib/presentation/providers/` - Riverpod controller/state pairs
 
-Current providers:
-- `JournalProvider` - journal analysis state
-- `InsightsProvider` - analytics/insights state
+Current Riverpod providers:
+- `journalControllerProvider` - journal analysis state and actions
+- `insightsControllerProvider` - analytics/insights state and actions
 
-### Provider used in a BLoC-style way
+### Riverpod state flow
 
-State management is implemented with `Provider + ChangeNotifier`, but structured similar to BLoC responsibilities:
+State management is implemented with `flutter_riverpod` `NotifierProvider`s and immutable state snapshots:
 
 - **UI (Screens):** renders state and dispatches intents (`analyze`, `load`)
-- **Provider:** state holder and event handler (`loading`, `error`, `data`)
+- **Riverpod controller:** state holder and event handler (`loading`, `error`, `data`)
 - **Repository:** business/data orchestration
 - **Data source:** local or remote API implementation
 
-So you get BLoC-like separation without extra BLoC boilerplate.
+This keeps the AI and analytics flows testable without passing mutable `ChangeNotifier` objects through the widget tree.
 
 ## FastAPI Backend Integration
 

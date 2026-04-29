@@ -7,13 +7,11 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import 'package:mind_heaven/main.dart';
+import 'package:mind_heaven/screens/splash_screen.dart';
 
 void main() {
   testWidgets('App boots and shows splash branding', (WidgetTester tester) async {
-    await tester.pumpWidget(const MyApp());
-    await tester.pump(const Duration(milliseconds: 2300));
+    await tester.pumpWidget(const MaterialApp(home: SplashScreen()));
 
     expect(find.byType(Scaffold), findsWidgets);
   });

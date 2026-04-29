@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'home_shell.dart';
+import '../app/router.dart';
+import '../services/auth_service.dart';
 
 /// Single auth screen: Login or Sign up via [initialLogin].
 class AuthScreen extends StatefulWidget {
@@ -18,6 +19,8 @@ class _AuthScreenState extends State<AuthScreen> {
   final _passwordController = TextEditingController();
   final _nameController = TextEditingController();
   bool _obscurePassword = true;
+  bool _submitting = false;
+  final _authService = AuthService();
 
   @override
   void initState() {
@@ -33,12 +36,66 @@ class _AuthScreenState extends State<AuthScreen> {
     super.dispose();
   }
 
-  void _submit() {
-    if (_formKey.currentState?.validate() ?? false) {
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (context) => const HomeShell()),
-        (route) => false,
+  Future<void> _submit() async {
+    if (!(_formKey.currentState?.validate() ?? false)) return;
+    setState(() => _submitting = true);
+    try {
+      if (_isLogin) {
+        await _authService.signIn(
+          email: _emailController.text.trim(),
+          password: _passwordController.text,
+        );
+      } else {
+        await _authService.signUp(
+          name: _nameController.text.trim(),
+          email: _emailController.text.trim(),
+          password: _passwordController.text,
+        );
+      }
+      if (!mounted) return;
+      Navigator.of(
+        context,
+      ).pushNamedAndRemoveUntil(AppRoutes.shell, (route) => false);
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.toString())));
+    } finally {
+      if (mounted) setState(() => _submitting = false);
+    }
+  }
+
+  Future<void> _forgotPassword() async {
+    final email = _emailController.text.trim();
+    if (email.isEmpty || !email.contains('@')) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Enter your email first for reset.')),
       );
+      return;
+    }
+    await _authService.resetPassword(email);
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Password reset requested. Check your email.')),
+    );
+  }
+
+  Future<void> _googleSignIn() async {
+    setState(() => _submitting = true);
+    try {
+      await _authService.signInWithGoogle();
+      if (!mounted) return;
+      Navigator.of(
+        context,
+      ).pushNamedAndRemoveUntil(AppRoutes.shell, (route) => false);
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.toString())));
+    } finally {
+      if (mounted) setState(() => _submitting = false);
     }
   }
 
@@ -72,7 +129,7 @@ class _AuthScreenState extends State<AuthScreen> {
                 Text(
                   _isLogin
                       ? 'Sign in to continue'
-                      : 'Sign up to get started with Mind Heaven',
+                      : 'Sign up to get started with Reframed',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: Colors.blueGrey.shade400,
                       ),
@@ -132,14 +189,14 @@ class _AuthScreenState extends State<AuthScreen> {
                   Align(
                     alignment: Alignment.centerRight,
                     child: TextButton(
-                      onPressed: () {},
+                      onPressed: _forgotPassword,
                       child: const Text('Forgot password?'),
                     ),
                   ),
                 ],
                 const SizedBox(height: 24),
                 FilledButton(
-                  onPressed: _submit,
+                  onPressed: _submitting ? null : _submit,
                   style: FilledButton.styleFrom(
                     backgroundColor: const Color(0xFF4ECDC4),
                     foregroundColor: Colors.black,
@@ -149,6 +206,12 @@ class _AuthScreenState extends State<AuthScreen> {
                     ),
                   ),
                   child: Text(_isLogin ? 'Login' : 'Sign up'),
+                ),
+                const SizedBox(height: 8),
+                OutlinedButton.icon(
+                  onPressed: _submitting ? null : _googleSignIn,
+                  icon: const Icon(Icons.login),
+                  label: const Text('Continue with Google'),
                 ),
                 const SizedBox(height: 20),
                 Row(

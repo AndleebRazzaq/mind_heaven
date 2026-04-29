@@ -1,3 +1,11 @@
+/// Light / water hints for the environmental card (wellness copy, not horticultural advice).
+class PlantCareMeta {
+  final String lightLabel;
+  final String waterLabel;
+
+  const PlantCareMeta(this.lightLabel, this.waterLabel);
+}
+
 class PlantSuggestionDatabase {
   PlantSuggestionDatabase._();
 
@@ -80,5 +88,29 @@ class PlantSuggestionDatabase {
       if (mood.contains(entry.key)) return entry.value;
     }
     return _defaultAssetPath;
+  }
+
+  /// Care hints from common name substrings (matches API / local suggestion names).
+  static PlantCareMeta careMetaForPlantName(String plantName) {
+    final n = plantName.toLowerCase();
+    if (n.contains('lavender')) {
+      return const PlantCareMeta('Bright indirect light', 'Moderate water');
+    }
+    if (n.contains('snake')) {
+      return const PlantCareMeta('Low to bright indirect', 'Low — drought tolerant');
+    }
+    if (n.contains('zz')) {
+      return const PlantCareMeta('Low to medium light', 'Low — forgiving');
+    }
+    if (n.contains('aloe')) {
+      return const PlantCareMeta('Bright light', 'Low — let soil dry between waterings');
+    }
+    if (n.contains('peace')) {
+      return const PlantCareMeta('Medium indirect light', 'Moderate water');
+    }
+    if (n.contains('pothos')) {
+      return const PlantCareMeta('Low to bright indirect', 'Moderate water');
+    }
+    return const PlantCareMeta('Indirect light', 'Moderate water');
   }
 }

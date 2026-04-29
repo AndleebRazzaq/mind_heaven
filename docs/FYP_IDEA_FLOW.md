@@ -1,4 +1,4 @@
-# Mind Heaven – Final FYP Idea Flow (Refined)
+﻿# Mind Heaven – Final FYP Idea Flow (Refined)
 
 ## Project Title
 **CBT-Based AI Journaling & Cognitive Distortion Detection System**

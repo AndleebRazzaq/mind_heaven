@@ -49,7 +49,10 @@ void main() {
       useRemote: false,
     );
 
-    final result = await repo.analyzeAndSave('I always fail');
+    final result = await repo.analyzeAndSave(
+      'I always fail',
+      userReportedIntensity: 8,
+    );
 
     expect(result.intervention.plantSuggestion, 'Lavender');
     expect(fakeStorage.saved.length, 1);

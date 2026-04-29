@@ -113,7 +113,7 @@ There is **no** check-in / voice / fusion path in the current app build; Insight
 
 ## 6. Analytics (Insights)
 
-**Implementation:** `lib/services/analytics_service.dart` + `InsightsProvider`.
+**Implementation:** `lib/services/analytics_service.dart` + `insightsControllerProvider`.
 
 **Stored signals:** timestamps, mood labels, distortion types, derived stress where applicable.
 

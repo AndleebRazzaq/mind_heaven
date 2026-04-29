@@ -214,6 +214,14 @@ class CBTMapping {
           ? null
           : _distortionLabel(distortionType),
       confidence: confidence,
+      responseValidation: _acknowledgeEmotion(moodLabel),
+      responsePatternAwareness: explanation,
+      cognitivePrompts: const [
+        'What evidence supports this thought?',
+        'What evidence challenges it?',
+        'Is there another possible explanation?',
+      ],
+      balancedReframeSuggestion: safeReframe,
     );
   }
 }

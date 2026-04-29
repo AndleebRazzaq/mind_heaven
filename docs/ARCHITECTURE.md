@@ -90,7 +90,8 @@ lib/
 ├── data/
 │   ├── repositories/          # JournalRepositoryImpl (local vs remote)
 │   └── remote/                # JournalRemoteDataSource → FastAPI
-├── presentation/providers/     # JournalProvider, InsightsProvider
+├── app/app_providers.dart      # Riverpod dependency providers
+├── presentation/providers/     # Riverpod controllers/states
 ├── core/
 │   ├── config/                 # API_BASE_URL (dart-define)
 │   ├── network/                # ApiClient
@@ -127,7 +128,7 @@ Text → `InterventionBuilder` → mock distortion/emotion → `CBTMapping.getIn
 Text → `POST /analyze/journal` → JSON → `CBTIntervention` → UI → `StorageService`.
 
 **Insights:**  
-Stored entries → `AnalyticsService` → `InsightsProvider` → UI.
+Stored entries → `AnalyticsService` → `insightsControllerProvider` → UI.
 
 ---
 
