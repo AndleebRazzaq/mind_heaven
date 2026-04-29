@@ -1,9 +1,10 @@
-import 'package:riverpod/riverpod.dart';
+import 'package:flutter/foundation.dart';
+import '../../services/analytics_service.dart';
 
-import '../../app/app_providers.dart';
-import '../../services/analytics_models.dart';
+class InsightsProvider extends ChangeNotifier {
+  final AnalyticsService _analyticsService;
 
-const _unset = Object();
+  InsightsProvider(this._analyticsService);
 
   bool isLoading = false;
   String? error;

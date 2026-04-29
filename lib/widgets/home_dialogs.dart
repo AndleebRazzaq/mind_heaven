@@ -216,9 +216,11 @@ class _BreathingExerciseDialogState extends State<BreathingExerciseDialog>
                   height: 100,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: const Color(0xFF4C93D8).withValues(alpha: 0.2),
+                    // ignore: deprecated_member_use
+                    color: const Color(0xFF4C93D8).withOpacity(0.2),
                     border: Border.all(
-                      color: const Color(0xFF60A5FA).withValues(alpha: 0.75),
+                      // ignore: deprecated_member_use
+                      color: const Color(0xFF60A5FA).withOpacity(0.75),
                       width: 2,
                     ),
                   ),

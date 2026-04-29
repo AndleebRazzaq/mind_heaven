@@ -13,9 +13,6 @@ class OnboardingScreen extends StatefulWidget {
 class _OnboardingScreenState extends State<OnboardingScreen> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
-  static const String _onboardAsset =
-      'assets/onboarding/onboard_illustration_1.png';
-  static const String _altOnboardAsset = 'assets/logo/logo_floral.png';
 
   static const _pages = [
     _OnboardingPage(

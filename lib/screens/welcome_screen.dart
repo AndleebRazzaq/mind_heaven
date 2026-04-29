@@ -5,14 +5,6 @@ import '../app/router.dart';
 class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
 
-  void _openSignUp(BuildContext context) {
-    Navigator.of(context).pushNamed(AppRoutes.authSignUp);
-  }
-
-  void _openSignIn(BuildContext context) {
-    Navigator.of(context).pushNamed(AppRoutes.authLogin);
-  }
-
   @override
   State<WelcomeScreen> createState() => _WelcomeScreenState();
 }
@@ -22,11 +14,6 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    const accent = Color(0xFFA78BFA);
-    const textPrimary = Color(0xFFE8EAED);
-    const textMuted = Color(0xFFC8CBD2);
-
     return Scaffold(
       backgroundColor: const Color(0xFF101216), // Very dark background
       body: SafeArea(
