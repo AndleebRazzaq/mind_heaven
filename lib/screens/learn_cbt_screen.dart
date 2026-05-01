@@ -33,13 +33,10 @@ class _LearnCbtScreenState extends State<LearnCbtScreen> {
       padding: const EdgeInsets.all(20),
       children: [
         Text(
-          'CBT Concepts',
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w700),
-        ),
-        const SizedBox(height: 6),
-        Text(
           'Understand your thoughts. Reduce emotional stress.',
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.blueGrey.shade300),
+          style: Theme.of(
+            context,
+          ).textTheme.bodyMedium?.copyWith(color: Colors.blueGrey.shade300),
         ),
         const SizedBox(height: 14),
         TextField(
@@ -58,7 +55,9 @@ class _LearnCbtScreenState extends State<LearnCbtScreen> {
               category: c,
               onOpen: () {
                 Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => CbtLearnCategoryScreen(category: c)),
+                  MaterialPageRoute(
+                    builder: (_) => CbtLearnCategoryScreen(category: c),
+                  ),
                 );
               },
             ),
@@ -66,7 +65,10 @@ class _LearnCbtScreenState extends State<LearnCbtScreen> {
         ),
         if (_query.isNotEmpty) ...[
           const SizedBox(height: 18),
-          Text('Search results', style: Theme.of(context).textTheme.titleMedium),
+          Text(
+            'Search results',
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
           const SizedBox(height: 10),
           ...filtered.map(
             (a) => Padding(
@@ -75,7 +77,9 @@ class _LearnCbtScreenState extends State<LearnCbtScreen> {
                 article: a,
                 onOpen: () {
                   Navigator.of(context).push(
-                    MaterialPageRoute(builder: (_) => CbtLearnArticleScreen(article: a)),
+                    MaterialPageRoute(
+                      builder: (_) => CbtLearnArticleScreen(article: a),
+                    ),
                   );
                 },
               ),
@@ -116,7 +120,9 @@ class _CbtLearnCategoryScreenState extends State<CbtLearnCategoryScreen> {
         children: [
           Text(
             widget.category.subtitle,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.blueGrey.shade300),
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(color: Colors.blueGrey.shade300),
           ),
           const SizedBox(height: 12),
           Wrap(
@@ -138,7 +144,9 @@ class _CbtLearnCategoryScreenState extends State<CbtLearnCategoryScreen> {
                 article: a,
                 onOpen: () {
                   Navigator.of(context).push(
-                    MaterialPageRoute(builder: (_) => CbtLearnArticleScreen(article: a)),
+                    MaterialPageRoute(
+                      builder: (_) => CbtLearnArticleScreen(article: a),
+                    ),
                   );
                 },
               ),
@@ -163,12 +171,16 @@ class CbtLearnArticleScreen extends StatelessWidget {
         children: [
           Text(
             article.title,
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w700),
+            style: Theme.of(
+              context,
+            ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: 8),
           Text(
             '${article.readMinutes} min read ? ${article.difficulty}',
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.blueGrey.shade300),
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(color: Colors.blueGrey.shade300),
           ),
           const SizedBox(height: 14),
           Container(
@@ -178,7 +190,10 @@ class CbtLearnArticleScreen extends StatelessWidget {
               color: const Color(0xFF1A1A1A),
             ),
             alignment: Alignment.center,
-            child: const Text('CBT', style: TextStyle(fontSize: 28, fontWeight: FontWeight.w700)),
+            child: const Text(
+              'CBT',
+              style: TextStyle(fontSize: 28, fontWeight: FontWeight.w700),
+            ),
           ),
           const SizedBox(height: 16),
           ...article.sections.map(
@@ -192,10 +207,7 @@ class CbtLearnArticleScreen extends StatelessWidget {
             child: const Text('Practice this in Journal'),
           ),
           const SizedBox(height: 8),
-          OutlinedButton(
-            onPressed: () {},
-            child: const Text('Save for later'),
-          ),
+          OutlinedButton(onPressed: () {}, child: const Text('Save for later')),
         ],
       ),
     );
@@ -227,13 +239,16 @@ class _CategoryCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(category.title, style: Theme.of(context).textTheme.titleMedium),
+                  Text(
+                    category.title,
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
                   const SizedBox(height: 2),
                   Text(
                     category.subtitle,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Colors.blueGrey.shade300,
-                        ),
+                      color: Colors.blueGrey.shade300,
+                    ),
                   ),
                 ],
               ),
@@ -296,7 +311,9 @@ class _SectionBlock extends StatelessWidget {
         children: [
           Text(
             title,
-            style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
+            style: Theme.of(
+              context,
+            ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: 8),
           Text(body, style: Theme.of(context).textTheme.bodyMedium),

@@ -57,15 +57,11 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
       return const Center(child: CircularProgressIndicator());
     }
     final trend = weeklyTrend;
-    final moodSpots = trend
-        .asMap()
-        .entries
-        .map((e) {
-          final stress = e.value.stressLevel.clamp(0, 1);
-          final moodScore = (((1 - stress) * 4) + 1).toDouble(); // map to 1..5
-          return FlSpot(e.key.toDouble(), moodScore);
-        })
-        .toList();
+    final moodSpots = trend.asMap().entries.map((e) {
+      final stress = e.value.stressLevel.clamp(0, 1);
+      final moodScore = (((1 - stress) * 4) + 1).toDouble(); // map to 1..5
+      return FlSpot(e.key.toDouble(), moodScore);
+    }).toList();
     final labels = trend.map((m) => DateFormat('EEE').format(m.date)).toList();
 
     return RefreshIndicator(
@@ -75,17 +71,9 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(
-              'Analytics',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-            const SizedBox(height: 8),
             Row(
               children: [
-                Text(
-                  '📅',
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
+                Text('📅', style: Theme.of(context).textTheme.titleMedium),
                 const SizedBox(width: 8),
                 DropdownButtonHideUnderline(
                   child: DropdownButton<AnalyticsRange>(
@@ -188,8 +176,8 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
               Text(
                 '${moodInsight ?? 'Your average mood increased slightly this week. Keep going.'} 🌿',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Colors.blueGrey.shade300,
-                    ),
+                  color: Colors.blueGrey.shade300,
+                ),
               ),
             ] else
               Card(
@@ -231,8 +219,8 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
               Text(
                 '${_prettyLabel(topEmotion ?? 'Unknown')} showed up most often this period.',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Colors.blueGrey.shade300,
-                    ),
+                  color: Colors.blueGrey.shade300,
+                ),
               ),
             ],
             const SizedBox(height: 18),
@@ -251,9 +239,9 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                     Text(
                       _prettyLabel(topPattern ?? 'Not enough data yet'),
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            color: const Color(0xFF60A5FA),
-                            fontWeight: FontWeight.w700,
-                          ),
+                        color: const Color(0xFF60A5FA),
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                     const SizedBox(height: 4),
                     Text(
@@ -265,8 +253,8 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                     Text(
                       _patternTip(topPattern),
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Colors.blueGrey.shade300,
-                          ),
+                        color: Colors.blueGrey.shade300,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     Align(
@@ -279,8 +267,10 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                                   context: context,
                                   backgroundColor: const Color(0xFF121212),
                                   builder: (ctx) {
-                                    final items = allPatternCounts.entries.toList()
-                                      ..sort((a, b) => b.value.compareTo(a.value));
+                                    final items =
+                                        allPatternCounts.entries.toList()..sort(
+                                          (a, b) => b.value.compareTo(a.value),
+                                        );
                                     return ListView(
                                       padding: const EdgeInsets.all(16),
                                       children: [
@@ -333,8 +323,8 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                       Text(
                         triggerInsight,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Colors.blueGrey.shade300,
-                            ),
+                          color: Colors.blueGrey.shade300,
+                        ),
                       ),
                     ],
                   ],
@@ -363,9 +353,9 @@ class _MetricTile extends StatelessWidget {
         title: Text(title),
         subtitle: Text(
           value,
-          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                color: const Color(0xFF60A5FA),
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.titleSmall?.copyWith(color: const Color(0xFF60A5FA)),
         ),
       ),
     );
@@ -376,19 +366,13 @@ class _EmotionProgressRow extends StatelessWidget {
   final String label;
   final double percent;
 
-  const _EmotionProgressRow({
-    required this.label,
-    required this.percent,
-  });
+  const _EmotionProgressRow({required this.label, required this.percent});
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
-        SizedBox(
-          width: 90,
-          child: Text(label),
-        ),
+        SizedBox(width: 90, child: Text(label)),
         Expanded(
           child: ClipRRect(
             borderRadius: BorderRadius.circular(10),

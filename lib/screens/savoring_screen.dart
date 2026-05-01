@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../models/journal_entry.dart';
+import '../services/storage_service.dart';
+
 class SavoringScreen extends StatefulWidget {
   const SavoringScreen({super.key});
 
@@ -10,6 +13,7 @@ class SavoringScreen extends StatefulWidget {
 class _SavoringScreenState extends State<SavoringScreen> {
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _contentController = TextEditingController();
+  bool _saving = false;
 
   final List<String> _prompts = [
     "What's a recent event that inspired you?",
@@ -24,6 +28,38 @@ class _SavoringScreenState extends State<SavoringScreen> {
     });
   }
 
+  Future<void> _saveEntry() async {
+    final content = _contentController.text.trim();
+    if (content.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Write a few lines before saving.'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    setState(() => _saving = true);
+    final now = DateTime.now();
+    final title = _titleController.text.trim().isEmpty
+        ? 'Savoring Journal'
+        : _titleController.text.trim();
+    await StorageService().addJournalEntry(
+      JournalEntry(
+        id: 'savoring-${now.microsecondsSinceEpoch}',
+        dateTime: now,
+        content: '${_prompts[_promptIndex]}\n\n$content',
+        eventSummary: title,
+        moodLabel: 'Positive',
+        tags: const ['savoring'],
+      ),
+    );
+
+    if (!mounted) return;
+    Navigator.pop(context, true);
+  }
+
   @override
   void dispose() {
     _titleController.dispose();
@@ -36,6 +72,7 @@ class _SavoringScreenState extends State<SavoringScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFF101216), // Dark background
       appBar: AppBar(
+        title: const Text('Savoring Journal'),
         backgroundColor: Colors.transparent,
         elevation: 0,
         automaticallyImplyLeading: false,
@@ -203,10 +240,7 @@ class _SavoringScreenState extends State<SavoringScreen> {
                 width: double.infinity,
                 height: 56,
                 child: FilledButton(
-                  onPressed: () {
-                    // Logic to save savoring journal
-                    Navigator.pop(context);
-                  },
+                  onPressed: _saving ? null : _saveEntry,
                   style: FilledButton.styleFrom(
                     backgroundColor: const Color(0xFF8A6BFF), // Purple
                     foregroundColor: Colors.white,
@@ -214,10 +248,19 @@ class _SavoringScreenState extends State<SavoringScreen> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  child: const Text(
-                    'Continue',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-                  ),
+                  child: _saving
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Text(
+                          'Save entry',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                 ),
               ),
             ),

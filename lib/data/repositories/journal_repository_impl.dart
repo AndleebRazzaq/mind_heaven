@@ -21,27 +21,35 @@ class JournalRepositoryImpl implements JournalRepository {
     FirestoreJournalService? cloudService,
     JournalRemoteDataSource? remote,
     this.useRemote = false,
-  })  : _storage = storage,
-        _localBuilder = localBuilder,
-        _authService = authService ?? AuthService(),
-        _cloudService = cloudService ?? FirestoreJournalService(),
-        _remote = remote;
+  }) : _storage = storage,
+       _localBuilder = localBuilder,
+       _authService = authService ?? AuthService(),
+       _cloudService = cloudService ?? FirestoreJournalService(),
+       _remote = remote;
 
   DistortionType _mapDistortionLabel(String? rawLabel) {
     final label = (rawLabel ?? '').trim().toLowerCase();
     if (label.contains('all-or-nothing')) return DistortionType.allOrNothing;
     if (label.contains('overgeneral')) return DistortionType.overgeneralization;
     if (label.contains('mental filter')) return DistortionType.mentalFilter;
-    if (label.contains('disqualifying')) return DistortionType.disqualifyingPositive;
+    if (label.contains('disqualifying')) {
+      return DistortionType.disqualifyingPositive;
+    }
     if (label.contains('jumping')) return DistortionType.jumpingToConclusions;
-    if (label.contains('mind reading')) return DistortionType.jumpingToConclusions;
+    if (label.contains('mind reading')) {
+      return DistortionType.jumpingToConclusions;
+    }
     if (label.contains('catastroph') || label.contains('magnification')) {
       return DistortionType.magnification;
     }
-    if (label.contains('emotional reasoning')) return DistortionType.emotionalReasoning;
+    if (label.contains('emotional reasoning')) {
+      return DistortionType.emotionalReasoning;
+    }
     if (label.contains('should')) return DistortionType.shouldStatements;
     if (label.contains('label')) return DistortionType.labeling;
-    if (label.contains('personalization')) return DistortionType.personalization;
+    if (label.contains('personalization')) {
+      return DistortionType.personalization;
+    }
     return DistortionType.unknown;
   }
 
@@ -70,23 +78,29 @@ class JournalRepositoryImpl implements JournalRepository {
           )
         : (await _localBuilder.buildForJournal(text)).intervention;
 
+    final tags = _extractTags(text);
+    if (!tags.contains('ai-journal')) tags.insert(0, 'ai-journal');
+
     final entry = JournalEntry(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       dateTime: DateTime.now(),
       content: text,
-      detectedDistortion: _mapDistortionLabel(intervention.detectedDistortionLabel),
+      detectedDistortion: _mapDistortionLabel(
+        intervention.detectedDistortionLabel,
+      ),
       detectedDistortionLabel: intervention.detectedDistortionLabel,
       confidenceLevel: intervention.confidenceLevel ?? intervention.certainty,
       reframe: intervention.reframeGuidance,
       eventSummary: intervention.eventSummary,
-      coreBelief:
-          intervention.coreBeliefs.isEmpty ? null : intervention.coreBeliefs.first,
+      coreBelief: intervention.coreBeliefs.isEmpty
+          ? null
+          : intervention.coreBeliefs.first,
       behavioralShiftPrompt: intervention.behavioralShiftPrompt,
       reframeGenerationMode: intervention.reframeGenerationMode,
       plantSuggestion: intervention.plantSuggestion,
       moodLabel: intervention.moodLabel,
       stressBefore: stressBefore,
-      tags: _extractTags(text),
+      tags: tags,
     );
     await _storage.addJournalEntry(entry);
     final user = await _authService.getCurrentUser();

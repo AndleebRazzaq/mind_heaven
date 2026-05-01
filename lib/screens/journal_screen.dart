@@ -530,7 +530,8 @@ class _JournalScreenState extends State<JournalScreen> {
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.03),
+                    // ignore: deprecated_member_use
+                    color: Colors.white.withOpacity(0.03),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
@@ -790,7 +791,8 @@ class _StepCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: const Color(0xFF151515),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+        // ignore: deprecated_member_use
+        border: Border.all(color: Colors.white.withOpacity(0.06)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -841,7 +843,8 @@ class _InsightValueCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: const Color(0xFF1A1D25),
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+        // ignore: deprecated_member_use
+        border: Border.all(color: Colors.white.withOpacity(0.06)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1061,9 +1064,12 @@ class _BreathingExerciseCardState extends State<_BreathingExerciseCard>
                 height: 110,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: const Color(0xFF4C93D8).withValues(alpha: 0.2),
+                  // ignore: deprecated_member_use
+                  color: const Color(0xFF4C93D8).withOpacity(0.2),
+                  // ignore: deprecated_member_use
                   border: Border.all(
-                    color: const Color(0xFF60A5FA).withValues(alpha: 0.75),
+                    // ignore: deprecated_member_use
+                    color: const Color(0xFF60A5FA).withOpacity(0.75),
                     width: 2,
                   ),
                 ),
@@ -1184,7 +1190,8 @@ class _AnalyzingOverlay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ColoredBox(
-      color: Colors.black.withValues(alpha: 0.55),
+      // ignore: deprecated_member_use
+      color: Colors.black.withOpacity(0.55),
       child: Center(
         child: Card(
           margin: const EdgeInsets.symmetric(horizontal: 28),
@@ -1223,7 +1230,8 @@ class _PlantReferenceImage extends StatelessWidget {
       decoration: BoxDecoration(
         color: const Color(0xFF101010),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.green.withValues(alpha: 0.35)),
+        // ignore: deprecated_member_use
+        border: Border.all(color: Colors.green.withOpacity(0.35)),
       ),
       clipBehavior: Clip.antiAlias,
       child: Image.asset(

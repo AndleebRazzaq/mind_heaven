@@ -3,8 +3,6 @@ import 'package:provider/provider.dart';
 import '../presentation/providers/journal_provider.dart';
 import '../widgets/home_dialogs.dart';
 import 'journal_screen.dart';
-import 'check_in_screen.dart';
-import 'savoring_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -21,182 +19,196 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const _HomeCalendarHeader(),
-          _SectionTitle('Quick entries'),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: _QuickEntryCard(
-                  title: 'Check-in',
-                  icon: Icons.published_with_changes,
-                  onTap: () => _showCheckInDialog(context),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: _QuickEntryCard(
-                  title: 'Savoring',
-                  icon: Icons.local_florist_outlined,
-                  onTap: () => _showSavoringJournal(context),
-                ),
-              ),
-            ],
+          // Header with date
+          _DateTimeHeader(),
+          const SizedBox(height: 24),
+
+          // Quick action cards
+          _QuickActionSection(
+            onCheckIn: _showCheckInDialog,
+            onSavoring: _showSavoringJournal,
+            onBreathe: _showBreathingExercise,
           ),
           const SizedBox(height: 24),
 
-          _SectionTitle('Deep-dive journals'),
-          const SizedBox(height: 12),
-          _DeepDiveCard(
-            title: 'Thought journal',
-            description: 'Overcome unhelpful patterns.',
-            icon: Icons.draw_outlined,
-            onTap: () {},
-          ),
-          const SizedBox(height: 12),
-          _DeepDiveCard(
-            title: 'Exposure journal',
-            description: 'Fight your fears by facing them.',
-            icon: Icons.person_pin_circle_outlined,
-            onTap: () {},
-          ),
+          // Mood grounding & plant suggestions
+          _MoodGroundingSection(),
           const SizedBox(height: 24),
 
-          _SectionTitle('Other tools'),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: _ToolCard(
-                  title: 'Breathe',
-                  icon: Icons.air,
-                  onTap: _showBreathingExercise,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: _ToolCard(
-                  title: 'Free-form',
-                  icon: Icons.note_alt_outlined,
-                  onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const JournalScreen()),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: _ToolCard(
-                  title: 'Emergency',
-                  icon: Icons.support,
-                  onTap: () {},
-                ),
-              ),
-            ],
-          ),
+          // Emergency support section
+          _EmergencySupportSection(),
           const SizedBox(height: 24),
 
-          _SectionTitle('Completed entries'),
-          const SizedBox(height: 12),
-          _CompletedEntriesList(),
+          // Completed entries list
+          _CompletedEntriesSection(),
+          const SizedBox(height: 20),
         ],
       ),
     );
   }
 
   void _showCheckInDialog(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const CheckInScreen()),
-    );
+    showDialog(context: context, builder: (ctx) => const CheckInDialog()).then((
+      result,
+    ) {
+      if (result != null && mounted) {
+        ScaffoldMessenger.of(
+          // ignore: use_build_context_synchronously
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Check-in saved!')));
+      }
+    });
   }
 
   void _showSavoringJournal(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const SavoringScreen()),
-    );
+    showDialog(
+      context: context,
+      builder: (ctx) => const SavoringJournalDialog(),
+    ).then((result) {
+      if (result != null && mounted) {
+        ScaffoldMessenger.of(
+          // ignore: use_build_context_synchronously
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Gratitude saved!')));
+      }
+    });
   }
 
-  Future<void> _showBreathingExercise() async {
-    final result = await showDialog(
+  void _showBreathingExercise(BuildContext context) {
+    showDialog(
       context: context,
       builder: (ctx) => const BreathingExerciseDialog(),
-    );
-    if (!mounted || result == null) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Breathing exercise completed!')),
-    );
+    ).then((result) {
+      if (result != null && mounted) {
+        // ignore: use_build_context_synchronously
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Breathing exercise completed!')),
+        );
+      }
+    });
   }
 }
 
-class _SectionTitle extends StatelessWidget {
-  final String title;
-  const _SectionTitle(this.title);
+class _DateTimeHeader extends StatelessWidget {
+  const _DateTimeHeader();
 
   @override
   Widget build(BuildContext context) {
-    return Text(
-      title,
-      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-        fontWeight: FontWeight.w500,
-        fontSize: 16,
-        color: Colors.white,
-      ),
+    final now = DateTime.now();
+    final weekdays = [
+      'Monday',
+      'Tuesday',
+      'Wednesday',
+      'Thursday',
+      'Friday',
+      'Saturday',
+      'Sunday',
+    ];
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
+
+    final dayName = weekdays[now.weekday - 1];
+    final month = months[now.month - 1];
+    final dateStr = '$dayName, $month ${now.day}';
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Welcome back',
+          style: Theme.of(
+            context,
+          ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w700),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          dateStr,
+          style: Theme.of(
+            context,
+          ).textTheme.bodyMedium?.copyWith(color: Colors.blueGrey.shade400),
+        ),
+      ],
     );
   }
 }
 
-class _QuickEntryCard extends StatelessWidget {
-  final String title;
-  final IconData icon;
-  final VoidCallback onTap;
+class _QuickActionSection extends StatelessWidget {
+  final Function(BuildContext) onCheckIn;
+  final Function(BuildContext) onSavoring;
+  final Function(BuildContext) onBreathe;
 
-  const _QuickEntryCard({
-    required this.title,
-    required this.icon,
-    required this.onTap,
+  const _QuickActionSection({
+    required this.onCheckIn,
+    required this.onSavoring,
+    required this.onBreathe,
   });
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(8),
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
-        decoration: BoxDecoration(
-          color: Colors.transparent,
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Quick actions',
+          style: Theme.of(
+            context,
+          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, color: const Color(0xFFB4C6FC), size: 24),
-            const SizedBox(width: 8),
-            Text(
-              title,
-              style: const TextStyle(
-                color: Color(0xFFB4C6FC),
-                fontSize: 15,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ],
+        const SizedBox(height: 12),
+        _QuickActionCard(
+          title: 'Check-in',
+          description: 'Emotion + context',
+          icon: Icons.sentiment_satisfied_outlined,
+          onTap: () => onCheckIn(context),
         ),
-      ),
+        const SizedBox(height: 10),
+        _QuickActionCard(
+          title: 'Savoring',
+          description: 'Gratitude & joy',
+          icon: Icons.favorite_outline,
+          onTap: () => onSavoring(context),
+        ),
+        const SizedBox(height: 10),
+        _QuickActionCard(
+          title: 'Breathe',
+          description: 'Guided breathing',
+          icon: Icons.air_outlined,
+          onTap: () => onBreathe(context),
+        ),
+        const SizedBox(height: 10),
+        _QuickActionCard(
+          title: 'Free Journal',
+          description: 'Write freely',
+          icon: Icons.edit_outlined,
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const JournalScreen()),
+          ),
+        ),
+      ],
     );
   }
 }
 
-class _DeepDiveCard extends StatelessWidget {
+class _QuickActionCard extends StatelessWidget {
   final String title;
   final String description;
   final IconData icon;
   final VoidCallback onTap;
 
-  const _DeepDiveCard({
+  const _QuickActionCard({
     required this.title,
     required this.description,
     required this.icon,
@@ -205,39 +217,50 @@ class _DeepDiveCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
+    return GestureDetector(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(8),
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.transparent,
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
+          color: const Color(0xFF14161B),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
         ),
         child: Row(
           children: [
-            Icon(icon, color: const Color(0xFFB4C6FC), size: 28),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      color: Color(0xFFB4C6FC),
-                      fontSize: 15,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    description,
-                    style: TextStyle(color: Colors.grey.shade300, fontSize: 14),
-                  ),
-                ],
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: const Color(0xFF1A1D25),
+                borderRadius: BorderRadius.circular(10),
               ),
+              child: Icon(icon, color: const Color(0xFF60A5FA), size: 24),
+            ),
+            const SizedBox(width: 12),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  description,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Colors.blueGrey.shade400,
+                  ),
+                ),
+              ],
+            ),
+            const Spacer(),
+            Icon(
+              Icons.arrow_forward_ios,
+              size: 16,
+              color: Colors.blueGrey.shade500,
             ),
           ],
         ),
@@ -246,240 +269,350 @@ class _DeepDiveCard extends StatelessWidget {
   }
 }
 
-class _ToolCard extends StatelessWidget {
-  final String title;
-  final IconData icon;
-  final VoidCallback onTap;
-
-  const _ToolCard({
-    required this.title,
-    required this.icon,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(8),
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 4),
-        decoration: BoxDecoration(
-          color: Colors.transparent,
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
-        ),
-        child: Column(
-          children: [
-            Icon(icon, color: const Color(0xFFB4C6FC), size: 24),
-            const SizedBox(height: 8),
-            Text(
-              title,
-              style: const TextStyle(
-                color: Color(0xFFB4C6FC),
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-              ),
-              textAlign: TextAlign.center,
-              maxLines: 1,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _CompletedEntriesList extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Consumer<JournalProvider>(
-      builder: (context, journalProvider, _) {
-        return Container(
-          decoration: BoxDecoration(
-            color: Colors.transparent,
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
-          ),
-          child: Column(
-            children: [
-              _CompletedEntryItem(
-                icon: Icons.local_florist_outlined,
-                title: 'Savoring Journal',
-                subtitle: 'Not feeling best at this moment...',
-              ),
-              Divider(color: Colors.white.withValues(alpha: 0.12), height: 1),
-              _CompletedEntryItem(
-                icon: Icons.published_with_changes,
-                title: 'Check-in',
-                subtitle: 'Anxious, Tired...',
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-}
-
-class _CompletedEntryItem extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String subtitle;
-
-  const _CompletedEntryItem({
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      leading: Icon(icon, color: const Color(0xFFB4C6FC)),
-      title: Text(
-        title,
-        style: const TextStyle(color: Colors.white, fontSize: 14),
-      ),
-      subtitle: Text(
-        subtitle,
-        style: TextStyle(color: Colors.grey.shade400, fontSize: 13),
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-      ),
-      onTap: () {},
-    );
-  }
-}
-
-class _HomeCalendarHeader extends StatelessWidget {
-  const _HomeCalendarHeader();
+class _MoodGroundingSection extends StatelessWidget {
+  const _MoodGroundingSection();
 
   @override
   Widget build(BuildContext context) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Date and dropdown
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text(
-              'Today, 29 April',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(width: 4),
-            Icon(Icons.arrow_drop_down, color: Colors.grey.shade400),
-          ],
+        Text(
+          'Mood grounding',
+          style: Theme.of(
+            context,
+          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
         ),
-        const SizedBox(height: 24),
-
-        // Days Row
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            children: [
-              _buildDayBox(context, 'Mon', isFirstEntry: true),
-              _buildDayBox(context, 'Tue'),
-              _buildDayBox(context, 'Wed', isSelected: true),
-              _buildDayBox(context, 'Thu'),
-              _buildDayBox(context, 'Fri'),
-              _buildDayBox(context, 'Sat'),
-              _buildDayBox(context, 'Sun'),
-            ],
+        const SizedBox(height: 12),
+        Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: const Color(0xFF151515),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
           ),
-        ),
-        const SizedBox(height: 28),
-
-        // Personalized Text
-        RichText(
-          text: TextSpan(
-            style: TextStyle(
-              color: Colors.grey.shade400,
-              fontSize: 15,
-              height: 1.5,
-            ),
-            children: const [
-              TextSpan(
-                text: 'Looking ahead: ',
-                style: TextStyle(
-                  color: Color(0xFFB4C6FC),
-                  fontWeight: FontWeight.w600,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Suggested plant for today',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Colors.blueGrey.shade300,
                 ),
               ),
-              TextSpan(
-                text:
-                    'It could be a lot positive and calm Peaceful...I thought I would able to think in gray',
+              const SizedBox(height: 8),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Snake Plant',
+                          style: Theme.of(context).textTheme.titleSmall
+                              ?.copyWith(color: Colors.greenAccent.shade200),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Brings calm, steady structure',
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(color: Colors.blueGrey.shade400),
+                        ),
+                        const SizedBox(height: 6),
+                        Row(
+                          spacing: 10,
+                          children: [
+                            Text(
+                              '☀️ Bright',
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
+                            Text(
+                              '💧 Monthly',
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Container(
+                    width: 80,
+                    height: 80,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF101010),
+                      borderRadius: BorderRadius.circular(8),
+                      // ignore: deprecated_member_use
+                      border: Border.all(color: Colors.green.withOpacity(0.35)),
+                    ),
+                    child: const Icon(
+                      Icons.local_florist_outlined,
+                      color: Colors.greenAccent,
+                      size: 40,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
         ),
-        const SizedBox(height: 40),
       ],
     );
   }
+}
 
-  Widget _buildDayBox(
-    BuildContext context,
-    String day, {
-    bool isSelected = false,
-    bool isFirstEntry = false,
-  }) {
-    return Container(
-      width: isFirstEntry ? 88 : 52,
-      height: 60,
-      margin: const EdgeInsets.only(right: 12),
-      decoration: BoxDecoration(
-        color: Colors.transparent,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: isSelected
-              ? Colors.white
-              : (isFirstEntry ? Colors.grey.shade700 : const Color(0xFF2C2C30)),
-          width: isSelected ? 1.5 : 1,
+class _EmergencySupportSection extends StatelessWidget {
+  const _EmergencySupportSection();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Need immediate support?',
+          style: Theme.of(
+            context,
+          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
         ),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            day,
-            style: TextStyle(
-              color: isSelected || isFirstEntry
-                  ? Colors.white
-                  : Colors.grey.shade600,
-              fontWeight: isSelected || isFirstEntry
-                  ? FontWeight.w600
-                  : FontWeight.normal,
-              fontSize: 14,
-            ),
+        const SizedBox(height: 12),
+        Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: const Color(0xFF2A1A1A),
+            borderRadius: BorderRadius.circular(12),
+            // ignore: deprecated_member_use
+            border: Border.all(color: Colors.red.withOpacity(0.3)),
           ),
-          if (isFirstEntry) ...[
-            const SizedBox(height: 4),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: const [
-                Text(
-                  'First entry ',
-                  style: TextStyle(
-                    color: Color(0xFFE4A4C1),
-                    fontSize: 11,
-                    fontWeight: FontWeight.w500,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    Icons.warning_outlined,
+                    color: Colors.orange.shade300,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Crisis Resources',
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: Colors.orange.shade200,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              Text(
+                'If you\'re in crisis or having thoughts of self-harm, please reach out:',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Colors.blueGrey.shade300,
+                ),
+              ),
+              const SizedBox(height: 10),
+              FilledButton.tonal(
+                style: FilledButton.styleFrom(
+                  // ignore: deprecated_member_use
+                  backgroundColor: Colors.red.withOpacity(0.1),
+                  foregroundColor: Colors.red.shade300,
+                ),
+                onPressed: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text(
+                        'Emergency contacts: 988 (US) | Local hotline',
+                      ),
+                    ),
+                  );
+                },
+                child: const Text('View Crisis Resources'),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _CompletedEntriesSection extends StatelessWidget {
+  const _CompletedEntriesSection();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Recent reflections',
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+            ),
+            TextButton(onPressed: () {}, child: const Text('See all')),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Consumer<JournalProvider>(
+          builder: (context, journalProvider, _) {
+            // This would typically load entries from the provider
+            // For now, showing placeholder
+            return Column(
+              children: [
+                _EntryCard(
+                  date: 'Today',
+                  mood: 'Anxious',
+                  distortion: 'Catastrophizing',
+                  stressBefore: 8.0,
+                  stressAfter: 5.0,
+                ),
+                const SizedBox(height: 10),
+                _EntryCard(
+                  date: 'Yesterday',
+                  mood: 'Frustrated',
+                  distortion: 'All-or-nothing',
+                  stressBefore: 7.0,
+                  stressAfter: 4.0,
+                ),
+                const SizedBox(height: 10),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 12,
+                  ),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF14161B),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.06),
+                    ),
+                  ),
+                  child: Center(
+                    child: Text(
+                      'No more entries',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Colors.blueGrey.shade400,
+                      ),
+                    ),
                   ),
                 ),
-                Icon(Icons.check, color: Color(0xFFE4A4C1), size: 12),
+              ],
+            );
+          },
+        ),
+      ],
+    );
+  }
+}
+
+class _EntryCard extends StatelessWidget {
+  final String date;
+  final String mood;
+  final String distortion;
+  final double stressBefore;
+  final double stressAfter;
+
+  const _EntryCard({
+    required this.date,
+    required this.mood,
+    required this.distortion,
+    required this.stressBefore,
+    required this.stressAfter,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final stressReduction = ((stressBefore - stressAfter) / stressBefore * 100)
+        .toStringAsFixed(0);
+
+    return GestureDetector(
+      onTap: () {},
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: const Color(0xFF14161B),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
                 Text(
-                  '2',
-                  style: TextStyle(color: Color(0xFFE4A4C1), fontSize: 10),
+                  date,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Colors.blueGrey.shade400,
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    // ignore: deprecated_member_use
+                    color: Colors.green.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    '↓ $stressReduction%',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Colors.greenAccent.shade200,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Row(
+              spacing: 8,
+              children: [
+                Chip(
+                  label: Text(mood),
+                  labelStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Colors.blueGrey.shade200,
+                  ),
+                  backgroundColor: const Color(0xFF1A1D25),
+                  side: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
+                ),
+                Chip(
+                  label: Text(distortion),
+                  labelStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Colors.blueGrey.shade200,
+                  ),
+                  backgroundColor: const Color(0xFF1A1D25),
+                  side: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Stress: $stressBefore → $stressAfter',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Colors.blueGrey.shade400,
+                  ),
+                ),
+                Icon(
+                  Icons.arrow_forward_ios,
+                  size: 14,
+                  color: Colors.blueGrey.shade500,
                 ),
               ],
             ),
           ],
-        ],
+        ),
       ),
     );
   }

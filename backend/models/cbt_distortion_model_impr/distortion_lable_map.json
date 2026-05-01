@@ -1,0 +1,16 @@
+{
+    "label_map": {
+      "0": "All-or-Nothing Thinking",
+      "1": "Emotional Reasoning",
+      "2": "No Distortion",
+      "3": "Magnification",
+      "4": "Fortune-telling",
+      "5": "Personalization",
+      "6": "Should statements",
+      "7": "Overgeneralization",
+      "8": "Mind Reading",
+      "9": "Mental filter",
+      "10": "Labeling"
+    }
+  }
+  

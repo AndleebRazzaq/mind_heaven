@@ -27,8 +27,10 @@ class _HomeShellState extends State<HomeShell> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        titleSpacing: 16,
-        title: const _TopLogo(),
+        titleSpacing: 8,
+        title: Row(
+          children: const [_TopLogo(), SizedBox(width: 10), Text('Reframed')],
+        ),
       ),
       body: _screens[_currentIndex],
       bottomNavigationBar: _CustomBottomNavBar(

@@ -14,7 +14,7 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
-  static const String _logoAsset = 'assets/logo/reframed_logo_full.png';
+  static const String _logoAsset = 'assets/logo/reframed_logo.svg';
 
   @override
   void initState() {
@@ -58,7 +58,9 @@ class _SplashScreenState extends State<SplashScreen> {
                 width: 240,
                 fit: BoxFit.contain,
                 errorBuilder: (context, error, stackTrace) => const Icon(
-                  Icons.psychology, size: 90, color: Color(0xFFB4C6FC)
+                  Icons.psychology,
+                  size: 90,
+                  color: Color(0xFFB4C6FC),
                 ),
               ),
             ],

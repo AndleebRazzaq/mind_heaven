@@ -220,15 +220,13 @@ class _CheckInScreenState extends State<CheckInScreen> {
                 fillColor: const Color(0xFF1B1B1E),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(
-                    color: Colors.white.withValues(alpha: 0.2),
-                  ),
+                  // ignore: deprecated_member_use
+                  borderSide: BorderSide(color: Colors.white.withOpacity(0.2)),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(
-                    color: Colors.white.withValues(alpha: 0.2),
-                  ),
+                  // ignore: deprecated_member_use
+                  borderSide: BorderSide(color: Colors.white.withOpacity(0.2)),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
