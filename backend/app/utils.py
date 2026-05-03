@@ -3,17 +3,19 @@ import json
 import torch
 import torch.nn.functional as F
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
+from dotenv import load_dotenv
 
+load_dotenv()
 DEVICE = torch.device("cpu")
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # ==============================
 # PATHS
 # ==============================
 
-emotion_path = os.path.join(BASE_DIR, "models", "emotion_goemotions_model")
-cbt_path = os.path.join(BASE_DIR, "models", "cbt_distortion_model_impr")
+emotion_path = os.getenv("EMOTION_MODEL_PATH", os.path.join(BASE_DIR, "models", "emotion_goemotions_model"))
+cbt_path = os.getenv("CBT_MODEL_PATH", os.path.join(BASE_DIR, "models", "cbt_distortion_model_impr"))
 
 # ==============================
 # LOAD MODELS
@@ -135,12 +137,10 @@ def map_intensity(confidence: float):
 # ==============================
 
 import requests
-from dotenv import load_dotenv
 
-load_dotenv()
 
 OLLAMA_URL = os.getenv("OLLAMA_URL", "http://localhost:11434/api/generate")
-OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3")
+OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3.2:1b")
 
 SYSTEM_PROMPT = """
 You are a calm, supportive CBT-based journaling assistant.

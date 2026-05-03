@@ -20,13 +20,12 @@ class _FakeInterventionBuilder extends InterventionBuilder {
   @override
   Future<JournalInterventionResult> buildForJournal(String text) async {
     final intervention = CBTIntervention(
-      distortionExplanation: 'dist',
-      emotionalAcknowledgment: 'ack',
-      interventionMode: 'Direct CBT correction',
-      cbtTechnique: 'Evidence examination',
-      reframeGuidance: 'reframe',
-      copingExerciseTitle: 'exercise',
-      copingExerciseDescription: 'desc',
+      distortionDescription: 'dist',
+      insight: 'ack',
+      microInterventionTitle: 'Evidence examination',
+      reframe: 'reframe',
+      breathingTechnique: 'exercise',
+      action: 'desc',
       plantSuggestion: 'Lavender',
       moodLabel: 'Anxiety',
       confidence: 0.82,

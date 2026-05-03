@@ -12,13 +12,12 @@ class _FakeSuccessJournalRepository implements JournalRepository {
     double? stressBefore,
   }) async {
     final intervention = CBTIntervention(
-      distortionExplanation: 'test',
-      emotionalAcknowledgment: 'ack',
-      interventionMode: 'Direct CBT correction',
-      cbtTechnique: 'Cognitive restructuring',
-      reframeGuidance: 'reframe',
-      copingExerciseTitle: 'exercise',
-      copingExerciseDescription: 'description',
+      distortionDescription: 'test',
+      insight: 'ack',
+      microInterventionTitle: 'Cognitive restructuring',
+      reframe: 'reframe',
+      breathingTechnique: 'exercise',
+      action: 'description',
       plantSuggestion: 'Lavender',
       moodLabel: 'Anxiety',
       confidence: 0.82,
@@ -28,7 +27,7 @@ class _FakeSuccessJournalRepository implements JournalRepository {
       dateTime: DateTime.now(),
       content: text,
       detectedDistortion: DistortionType.magnification,
-      reframe: intervention.reframeGuidance,
+      reframe: intervention.reframe,
       plantSuggestion: intervention.plantSuggestion,
       moodLabel: intervention.moodLabel,
     );
