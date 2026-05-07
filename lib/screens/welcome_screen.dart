@@ -10,7 +10,7 @@ class WelcomeScreen extends StatefulWidget {
 }
 
 class _WelcomeScreenState extends State<WelcomeScreen> {
-  static const String _heroAsset = 'assets/logo/reframed_logo_full.png';
+  static const String _heroAsset = 'assets/logo/reframed_logo.png';
 
   @override
   Widget build(BuildContext context) {

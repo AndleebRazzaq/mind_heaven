@@ -13,9 +13,9 @@ class AnalyticsService {
     StorageService? storage,
     AuthService? authService,
     FirestoreJournalService? cloudService,
-  })  : _storage = storage ?? StorageService(),
-        _authService = authService ?? AuthService(),
-        _cloudService = cloudService ?? FirestoreJournalService();
+  }) : _storage = storage ?? StorageService(),
+       _authService = authService ?? AuthService(),
+       _cloudService = cloudService ?? FirestoreJournalService();
 
   Future<List<JournalEntry>> getJournalEntries() async {
     final local = await _storage.getJournalEntries();
@@ -30,12 +30,23 @@ class AnalyticsService {
 
   double _stressFromMoodLabel(String? moodLabel) {
     final mood = (moodLabel ?? '').toLowerCase();
-    if (mood.contains('anxiety')) return 0.75;
-    if (mood.contains('sad')) return 0.65;
-    if (mood.contains('anger')) return 0.7;
-    if (mood.contains('calm')) return 0.2;
-    if (mood.contains('hope')) return 0.35;
-    if (mood.contains('reflective')) return 0.45;
+    // Check-in labels
+    if (mood == 'terrible') return 0.9;
+    if (mood == 'bad') return 0.7;
+    if (mood == 'okay') return 0.5;
+    if (mood == 'good') return 0.3;
+    if (mood == 'great') return 0.1;
+
+    // AI labels
+    if (mood.contains('anxiety') || mood.contains('disappoint')) return 0.75;
+    if (mood.contains('sad') || mood.contains('grief')) return 0.65;
+    if (mood.contains('anger') || mood.contains('frustrat')) return 0.7;
+    if (mood.contains('calm') || mood.contains('peace')) return 0.2;
+    if (mood.contains('hope') ||
+        mood.contains('joy') ||
+        mood.contains('positive'))
+      return 0.3;
+    if (mood.contains('reflective') || mood.contains('confusion')) return 0.45;
     return 0.5;
   }
 
@@ -50,7 +61,7 @@ class AnalyticsService {
       final dayEnd = dayStart.add(const Duration(days: 1));
       double stressSum = 0;
       int count = 0;
-      String mood = 'Neutral';
+      String mood = 'No data';
       for (final j in journal) {
         if (j.dateTime.isAfter(dayStart) &&
             j.dateTime.isBefore(dayEnd) &&
@@ -60,13 +71,15 @@ class AnalyticsService {
           mood = j.moodLabel!;
         }
       }
-      final avgStress = count > 0 ? stressSum / count : 0.4;
-      list.add(MoodDataPoint(
-        date: dayStart,
-        moodLabel: mood,
-        stressLevel: avgStress,
-        count: count,
-      ));
+      final avgStress = count > 0 ? stressSum / count : 0.5;
+      list.add(
+        MoodDataPoint(
+          date: dayStart,
+          moodLabel: mood,
+          stressLevel: avgStress,
+          count: count,
+        ),
+      );
     }
     return list;
   }
@@ -86,7 +99,12 @@ class AnalyticsService {
     final entries = await getJournalEntries();
     final monthAgo = DateTime.now().subtract(const Duration(days: 30));
     final withDistortion = entries
-        .where((e) => e.dateTime.isAfter(monthAgo) && e.detectedDistortion != null && e.detectedDistortion != DistortionType.unknown)
+        .where(
+          (e) =>
+              e.dateTime.isAfter(monthAgo) &&
+              e.detectedDistortion != null &&
+              e.detectedDistortion != DistortionType.unknown,
+        )
         .toList();
     if (withDistortion.isEmpty) return null;
     final counts = <DistortionType, int>{};
@@ -101,7 +119,9 @@ class AnalyticsService {
   Future<ImprovementSummary> getImprovementSummary() async {
     final journal = await getJournalEntries();
     final twoWeeksAgo = DateTime.now().subtract(const Duration(days: 14));
-    final recent = journal.where((j) => j.dateTime.isAfter(twoWeeksAgo)).toList();
+    final recent = journal
+        .where((j) => j.dateTime.isAfter(twoWeeksAgo))
+        .toList();
     if (recent.length < 2) {
       return ImprovementSummary(
         stressImproved: false,
@@ -111,11 +131,13 @@ class AnalyticsService {
     final mid = recent.length ~/ 2;
     final firstHalf = recent.sublist(0, mid);
     final secondHalf = recent.sublist(mid);
-    final avgFirst = firstHalf
+    final avgFirst =
+        firstHalf
             .map((e) => _stressFromMoodLabel(e.moodLabel))
             .reduce((a, b) => a + b) /
         firstHalf.length;
-    final avgSecond = secondHalf
+    final avgSecond =
+        secondHalf
             .map((e) => _stressFromMoodLabel(e.moodLabel))
             .reduce((a, b) => a + b) /
         secondHalf.length;
@@ -154,7 +176,8 @@ class AnalyticsService {
     for (final entry in entries) {
       if (_hasText(entry.reframe)) withReframe++;
       if (_hasText(entry.behavioralShiftPrompt)) withBehaviorPrompt++;
-      if ((entry.reframeGenerationMode ?? '').contains('template')) structured++;
+      if ((entry.reframeGenerationMode ?? '').contains('template'))
+        structured++;
       final confidence = (entry.confidenceLevel ?? 'unknown').toLowerCase();
       confidenceCounts[confidence] = (confidenceCounts[confidence] ?? 0) + 1;
       final mode = (entry.reframeGenerationMode ?? 'unknown').toLowerCase();
@@ -182,10 +205,12 @@ class AnalyticsService {
       generationModeCounts: generationModeCounts,
       distortionCounts: distortionCounts,
       topEmotion: _topKey(emotionCounts),
-      averageStressBefore:
-          stressBeforeCount == 0 ? null : (stressBeforeSum / stressBeforeCount),
-      averageStressAfter:
-          stressAfterCount == 0 ? null : (stressAfterSum / stressAfterCount),
+      averageStressBefore: stressBeforeCount == 0
+          ? null
+          : (stressBeforeSum / stressBeforeCount),
+      averageStressAfter: stressAfterCount == 0
+          ? null
+          : (stressAfterSum / stressAfterCount),
     );
   }
 
@@ -233,14 +258,18 @@ class AnalyticsService {
     }
 
     final thisWeek = entries
-        .where((e) =>
-            !e.dateTime.isBefore(currentWeekStart) &&
-            e.dateTime.isBefore(currentWeekEnd))
+        .where(
+          (e) =>
+              !e.dateTime.isBefore(currentWeekStart) &&
+              e.dateTime.isBefore(currentWeekEnd),
+        )
         .toList();
     final lastWeek = entries
-        .where((e) =>
-            !e.dateTime.isBefore(previousWeekStart) &&
-            e.dateTime.isBefore(previousWeekEnd))
+        .where(
+          (e) =>
+              !e.dateTime.isBefore(previousWeekStart) &&
+              e.dateTime.isBefore(previousWeekEnd),
+        )
         .toList();
 
     final moodTrend = <MoodDataPoint>[];
@@ -248,7 +277,10 @@ class AnalyticsService {
       final dayStart = _startOfDay(currentWeekStart.add(Duration(days: i)));
       final dayEnd = dayStart.add(const Duration(days: 1));
       final sameDay = thisWeek
-          .where((e) => !e.dateTime.isBefore(dayStart) && e.dateTime.isBefore(dayEnd))
+          .where(
+            (e) =>
+                !e.dateTime.isBefore(dayStart) && e.dateTime.isBefore(dayEnd),
+          )
           .toList();
       if (sameDay.isEmpty) {
         moodTrend.add(
@@ -262,9 +294,15 @@ class AnalyticsService {
         continue;
       }
       final stressValues = sameDay
-          .map((e) => e.stressAfter ?? e.stressBefore ?? (_stressFromMoodLabel(e.moodLabel) * 10))
+          .map(
+            (e) =>
+                e.stressAfter ??
+                e.stressBefore ??
+                (_stressFromMoodLabel(e.moodLabel) * 10),
+          )
           .toList();
-      final avgStress = stressValues.reduce((a, b) => a + b) / stressValues.length;
+      final avgStress =
+          stressValues.reduce((a, b) => a + b) / stressValues.length;
       final mood = sameDay.last.moodLabel ?? 'Unknown';
       moodTrend.add(
         MoodDataPoint(
@@ -283,11 +321,14 @@ class AnalyticsService {
     }
     final topEmotion = emotionCounts.isEmpty
         ? null
-        : emotionCounts.entries.reduce((a, b) => a.value >= b.value ? a : b).key;
+        : emotionCounts.entries
+              .reduce((a, b) => a.value >= b.value ? a : b)
+              .key;
 
     final distortionCounts = <String, int>{};
     for (final entry in thisWeek) {
-      final label = entry.detectedDistortionLabel ??
+      final label =
+          entry.detectedDistortionLabel ??
           (entry.detectedDistortion?.name.replaceAll('_', ' ') ?? 'Unknown');
       final key = _normalizedLabel(label);
       if (key == 'Unknown') continue;
@@ -295,10 +336,17 @@ class AnalyticsService {
     }
     final topPattern = distortionCounts.isEmpty
         ? null
-        : distortionCounts.entries.reduce((a, b) => a.value >= b.value ? a : b).key;
-    final topPatternCount = topPattern == null ? 0 : (distortionCounts[topPattern] ?? 0);
+        : distortionCounts.entries
+              .reduce((a, b) => a.value >= b.value ? a : b)
+              .key;
+    final topPatternCount = topPattern == null
+        ? 0
+        : (distortionCounts[topPattern] ?? 0);
 
-    final totalEmotionCount = emotionCounts.values.fold<int>(0, (a, b) => a + b);
+    final totalEmotionCount = emotionCounts.values.fold<int>(
+      0,
+      (a, b) => a + b,
+    );
     final emotionPercentages = <String, double>{};
     if (totalEmotionCount > 0) {
       for (final e in emotionCounts.entries) {
@@ -309,7 +357,12 @@ class AnalyticsService {
     double? weekMoodScore(List<JournalEntry> list) {
       if (list.isEmpty) return null;
       final scores = list
-          .map((e) => e.stressAfter ?? e.stressBefore ?? (_stressFromMoodLabel(e.moodLabel) * 10))
+          .map(
+            (e) =>
+                e.stressAfter ??
+                e.stressBefore ??
+                (_stressFromMoodLabel(e.moodLabel) * 10),
+          )
           .map((stress) => (11 - stress).clamp(1, 10) / 2)
           .toList();
       return scores.reduce((a, b) => a + b) / scores.length;
@@ -319,7 +372,8 @@ class AnalyticsService {
     final previousMood = weekMoodScore(lastWeek);
     String summary;
     if (currentMood == null) {
-      summary = 'Add a few reflections this week to unlock your personalized insight summary.';
+      summary =
+          'Add a few reflections this week to unlock your personalized insight summary.';
     } else if (previousMood == null) {
       summary =
           'You are building momentum. Keep journaling to compare your progress week to week.';
@@ -337,10 +391,15 @@ class AnalyticsService {
       }
     }
 
-    final streakDays = thisWeek.map((e) => _startOfDay(e.dateTime)).toSet().length;
+    final streakDays = thisWeek
+        .map((e) => _startOfDay(e.dateTime))
+        .toSet()
+        .length;
     final thisWeekTags = <String, int>{};
     for (final entry in thisWeek) {
-      final tags = entry.tags.isNotEmpty ? entry.tags : _extractTagsFromText(entry.content);
+      final tags = entry.tags.isNotEmpty
+          ? entry.tags
+          : _extractTagsFromText(entry.content);
       for (final t in tags) {
         final key = t.toLowerCase();
         thisWeekTags[key] = (thisWeekTags[key] ?? 0) + 1;
@@ -348,16 +407,21 @@ class AnalyticsService {
     }
     String? triggerInsight;
     if (thisWeekTags.isNotEmpty) {
-      final topTag = thisWeekTags.entries.reduce((a, b) => a.value >= b.value ? a : b);
-      triggerInsight = '#${topTag.key} appears most often in your recent reflections.';
-      if (thisWeekTags.containsKey('exam') || thisWeekTags.containsKey('work')) {
+      final topTag = thisWeekTags.entries.reduce(
+        (a, b) => a.value >= b.value ? a : b,
+      );
+      triggerInsight =
+          '#${topTag.key} appears most often in your recent reflections.';
+      if (thisWeekTags.containsKey('exam') ||
+          thisWeekTags.containsKey('work')) {
         final examCount = thisWeekTags['exam'] ?? 0;
         final workCount = thisWeekTags['work'] ?? 0;
         final total = thisWeekTags.values.fold<int>(0, (a, b) => a + b);
         if (total > 0 && (examCount > 0 || workCount > 0)) {
           final examPct = ((examCount / total) * 100).round();
           final workPct = ((workCount / total) * 100).round();
-          triggerInsight = 'Common triggers this week: exam $examPct%, work $workPct%.';
+          triggerInsight =
+              'Common triggers this week: exam $examPct%, work $workPct%.';
         }
       }
     }
@@ -369,11 +433,13 @@ class AnalyticsService {
     if (moodDelta == null) {
       moodInsight = 'Your mood trend is building. Keep going.';
     } else if (moodDelta >= 3) {
-      moodInsight = 'Your average mood increased slightly this week. Keep going.';
+      moodInsight =
+          'Your average mood increased slightly this week. Keep going.';
     } else if (moodDelta <= -3) {
       moodInsight = 'This week felt heavier. Gentle consistency can help.';
     } else {
-      moodInsight = 'Your mood stayed stable this week. Consistency is helping.';
+      moodInsight =
+          'Your mood stayed stable this week. Consistency is helping.';
     }
 
     final growthInsight = streakDays >= 3

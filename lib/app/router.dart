@@ -7,6 +7,7 @@ import '../features/splash/presentation/splash_page.dart';
 import '../routes/app_routes.dart';
 import '../screens/auth_screen.dart';
 import '../screens/welcome_screen.dart';
+import '../screens/all_entries_screen.dart';
 export '../routes/app_routes.dart';
 
 class AppRouter {
@@ -40,6 +41,11 @@ class AppRouter {
       case AppRoutes.shell:
         return MaterialPageRoute(
           builder: (_) => const MainShellPage(),
+          settings: settings,
+        );
+      case AppRoutes.allEntries:
+        return MaterialPageRoute(
+          builder: (_) => const AllEntriesScreen(),
           settings: settings,
         );
       default:

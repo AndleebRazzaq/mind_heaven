@@ -36,7 +36,9 @@ class AppDependencies {
 Future<void> bootstrap() async {
   WidgetsFlutterBinding.ensureInitialized();
   await FirebaseRuntime.ensureInitialized();
-  FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+  if (FirebaseRuntime.isAvailable && !kIsWeb) {
+    FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+  }
 
   if (kDebugMode) {
     final prefs = await SharedPreferences.getInstance();
@@ -44,8 +46,10 @@ Future<void> bootstrap() async {
   }
 
   final authService = AuthService();
-  final notificationService = NotificationService(authService: authService);
-  await notificationService.initialize();
+  if (FirebaseRuntime.isAvailable && !kIsWeb) {
+    final notificationService = NotificationService(authService: authService);
+    await notificationService.initialize();
+  }
   final storageService = StorageService();
   final cloudService = FirestoreJournalService();
   final analyticsService = AnalyticsService(

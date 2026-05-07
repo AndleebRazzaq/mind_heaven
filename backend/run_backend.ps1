@@ -1,5 +1,5 @@
 param(
-  [int]$Port = 8001,
+  [int]$Port = 8000,
   [string]$BindHost = "0.0.0.0",
   [switch]$OpenDocs
 )

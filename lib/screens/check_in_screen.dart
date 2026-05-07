@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../presentation/providers/journal_provider.dart';
+import '../models/journal_entry.dart';
 
 class CheckInScreen extends StatefulWidget {
   const CheckInScreen({super.key});
@@ -9,6 +12,8 @@ class CheckInScreen extends StatefulWidget {
 
 class _CheckInScreenState extends State<CheckInScreen> {
   int _selectedMoodIndex = -1;
+  final TextEditingController _thoughtController = TextEditingController();
+  bool _isSaving = false;
 
   final List<Map<String, dynamic>> _moods = [
     {'label': 'Terrible', 'icon': Icons.sentiment_very_dissatisfied},
@@ -17,6 +22,52 @@ class _CheckInScreenState extends State<CheckInScreen> {
     {'label': 'Good', 'icon': Icons.sentiment_satisfied},
     {'label': 'Great', 'icon': Icons.sentiment_very_satisfied},
   ];
+
+  @override
+  void dispose() {
+    _thoughtController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _saveCheckIn() async {
+    if (_selectedMoodIndex == -1) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select how you are feeling.')),
+      );
+      return;
+    }
+
+    setState(() => _isSaving = true);
+    try {
+      final mood = _moods[_selectedMoodIndex]['label'];
+      final thoughts = _thoughtController.text.trim();
+      final now = DateTime.now();
+
+      final entry = JournalEntry(
+        id: 'checkin-${now.millisecondsSinceEpoch}',
+        dateTime: now,
+        content: thoughts.isEmpty ? 'Checked in as feeling $mood' : thoughts,
+        moodLabel: mood,
+        eventSummary: 'Daily Check-in',
+        tags: ['check-in'],
+      );
+
+      await context.read<JournalProvider>().saveManualEntry(entry);
+      if (mounted) {
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to save: $e')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isSaving = false);
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -213,20 +264,21 @@ class _CheckInScreenState extends State<CheckInScreen> {
             ),
             const SizedBox(height: 12),
             TextField(
+              controller: _thoughtController,
               maxLines: 4,
               style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
                 filled: true,
-                fillColor: const Color(0xFF1B1B1E),
+                fillColor: const Color(0xFF14161B),
+                hintText: 'Add some details...',
+                hintStyle: TextStyle(color: Colors.grey.shade600),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  // ignore: deprecated_member_use
-                  borderSide: BorderSide(color: Colors.white.withOpacity(0.2)),
+                  borderSide: BorderSide.none,
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  // ignore: deprecated_member_use
-                  borderSide: BorderSide(color: Colors.white.withOpacity(0.2)),
+                  borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.08)),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -235,6 +287,54 @@ class _CheckInScreenState extends State<CheckInScreen> {
               ),
             ),
             const SizedBox(height: 40),
+
+            // Save Button
+            Container(
+              width: double.infinity,
+              height: 56,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF8A6BFF), Color(0xFFE4A4C1)],
+                  begin: Alignment.centerLeft,
+                  end: Alignment.centerRight,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF8A6BFF).withValues(alpha: 0.25),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(12),
+                  onTap: _isSaving ? null : _saveCheckIn,
+                  child: Center(
+                    child: _isSaving
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Color(0xFF101216),
+                            ),
+                          )
+                        : const Text(
+                            'Save Check-in',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w700,
+                              color: Color(0xFF101216),
+                            ),
+                          ),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
           ],
         ),
       ),

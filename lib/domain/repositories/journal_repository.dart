@@ -12,6 +12,10 @@ abstract class JournalRepository {
     required String entryId,
     required double stressAfter,
   });
+
+  Future<List<JournalEntry>> getEntries();
+
+  Future<void> saveEntry(JournalEntry entry);
 }
 
 class JournalAnalysisResult {

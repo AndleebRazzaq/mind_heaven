@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../presentation/providers/journal_provider.dart';
 
 import '../models/journal_entry.dart';
-import '../services/storage_service.dart';
 
 class SavoringScreen extends StatefulWidget {
   const SavoringScreen({super.key});
@@ -45,7 +46,7 @@ class _SavoringScreenState extends State<SavoringScreen> {
     final title = _titleController.text.trim().isEmpty
         ? 'Savoring Journal'
         : _titleController.text.trim();
-    await StorageService().addJournalEntry(
+    await context.read<JournalProvider>().saveManualEntry(
       JournalEntry(
         id: 'savoring-${now.microsecondsSinceEpoch}',
         dateTime: now,
@@ -236,31 +237,49 @@ class _SavoringScreenState extends State<SavoringScreen> {
             // Continue Button at the bottom
             Padding(
               padding: const EdgeInsets.all(24.0),
-              child: SizedBox(
+              child: Container(
                 width: double.infinity,
                 height: 56,
-                child: FilledButton(
-                  onPressed: _saving ? null : _saveEntry,
-                  style: FilledButton.styleFrom(
-                    backgroundColor: const Color(0xFF8A6BFF), // Purple
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF8A6BFF), Color(0xFFE4A4C1)],
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF8A6BFF).withValues(alpha: 0.25),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(12),
+                    onTap: _saving ? null : _saveEntry,
+                    child: Center(
+                      child: _saving
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Color(0xFF101216),
+                              ),
+                            )
+                          : const Text(
+                              'Save entry',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w700,
+                                color: Color(0xFF101216),
+                              ),
+                            ),
                     ),
                   ),
-                  child: _saving
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Text(
-                          'Save entry',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
                 ),
               ),
             ),

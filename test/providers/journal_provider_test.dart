@@ -39,6 +39,12 @@ class _FakeSuccessJournalRepository implements JournalRepository {
     required String entryId,
     required double stressAfter,
   }) async {}
+
+  @override
+  Future<List<JournalEntry>> getEntries() async => [];
+
+  @override
+  Future<void> saveEntry(JournalEntry entry) async {}
 }
 
 class _FakeErrorJournalRepository implements JournalRepository {
@@ -56,6 +62,12 @@ class _FakeErrorJournalRepository implements JournalRepository {
     required String entryId,
     required double stressAfter,
   }) async {}
+
+  @override
+  Future<List<JournalEntry>> getEntries() async => [];
+
+  @override
+  Future<void> saveEntry(JournalEntry entry) async {}
 }
 
 void main() {

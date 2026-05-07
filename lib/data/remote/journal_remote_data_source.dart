@@ -11,29 +11,44 @@ class JournalRemoteDataSource {
     double? userReportedIntensity,
   }) async {
     final body = <String, dynamic>{'text': text};
-    if (userReportedIntensity != null) {
-      body['user_reported_intensity'] = userReportedIntensity;
-    }
-    
-    // Calls the updated /analyze endpoint
     final data = await _apiClient.post('/analyze', body: body);
-    
-    final emotion = data['emotion'] as Map<String, dynamic>?;
-    final distortion = data['distortion'] as Map<String, dynamic>?;
-    final aiResponse = data['ai_response'] as Map<String, dynamic>?;
+
+    final ai = data['ai_response'] as Map<String, dynamic>? ?? {};
+    final emotion = data['emotion'] as Map<String, dynamic>? ?? {};
+    final distortion = data['distortion'] as Map<String, dynamic>? ?? {};
 
     return CBTIntervention(
-      insight: aiResponse?['insight'] as String?,
-      pattern: aiResponse?['pattern'] as String?,
-      reframe: aiResponse?['reframe'] as String?,
-      action: aiResponse?['action'] as String?,
-      plantSuggestion: aiResponse?['plant'] as String?,
-      moodLabel: emotion?['label'] as String?,
-      emotionConfidence: (emotion?['confidence'] as num?)?.toDouble(),
-      emotionIntensity: (data['intensity'] as num?)?.toDouble(),
-      detectedDistortionLabel: distortion?['label'] as String?,
-      confidence: (distortion?['confidence'] as num?)?.toDouble(),
-      suggestBreathing: (data['show_breathing'] ?? false) as bool,
+      insight: ai['insight'],
+      pattern: ai['pattern_explanation'] ?? ai['pattern'],
+      reframe: ai['reframe'],
+      action: ai['action'],
+      distortionExplanation: ai['pattern_explanation'] ?? ai['pattern'] ?? '',
+      emotionalAcknowledgment: ai['insight'] ?? '',
+      interventionMode: 'AI Reframing',
+      cbtTechnique: 'Cognitive Reappraisal',
+      reframeGuidance: ai['reframe'] ?? '',
+      copingExerciseTitle: 'Small Step',
+      copingExerciseDescription: ai['action'] ?? '',
+      plantSuggestion: ai['plant'] ?? '',
+      suggestBreathing: data['show_breathing'] ?? false,
+      showBreathing: data['show_breathing'] ?? false,
+
+      // UPGRADED EMOTIONAL STATE FIELDS
+      emotionalState: emotion['final_label'] ?? emotion['label'] ?? 'Neutral',
+      emotionalStateSubtitle: ai['insight'] ?? '',
+      intensityLabel: emotion['intensity_label'] ?? 'Moderate',
+      emotionContext: emotion['context'] ?? 'general',
+
+      // Legacy fields
+      moodLabel: emotion['final_label'] ?? emotion['label'] ?? 'Neutral',
+      emotionConfidence: (emotion['confidence'] as num?)?.toDouble() ?? 0.0,
+      emotionIntensity: (emotion['intensity'] as num?)?.toDouble() ?? 0.0,
+      detectedDistortionLabel: distortion['label'] ?? 'none',
+      confidence: (distortion['confidence'] as num?)?.toDouble() ?? 0.0,
+      balancedReframeSuggestion: ai['reframe'] ?? '',
+      eventSummary: ai['insight'] ?? '',
+      distortionLogicLine: ai['pattern_explanation'] ?? ai['pattern'] ?? '',
+      behavioralShiftPrompt: ai['action'] ?? '',
     );
   }
 }

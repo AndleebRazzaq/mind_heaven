@@ -12,6 +12,7 @@ class JournalProvider extends ChangeNotifier {
   String? error;
   CBTIntervention? intervention;
   JournalEntry? lastEntry;
+  List<JournalEntry> entries = [];
 
   Future<void> analyze(
     String text, {
@@ -29,6 +30,7 @@ class JournalProvider extends ChangeNotifier {
       );
       intervention = result.intervention;
       lastEntry = result.entry;
+      await loadEntries(); // Refresh the entries list
     } catch (e) {
       error = e.toString();
     } finally {
@@ -53,5 +55,34 @@ class JournalProvider extends ChangeNotifier {
     );
     lastEntry = entry.copyWith(stressAfter: stressAfter);
     notifyListeners();
+  }
+
+  Future<void> loadEntries() async {
+    isLoading = true;
+    notifyListeners();
+    try {
+      entries = await _repository.getEntries();
+      // Sort by date descending
+      entries.sort((a, b) => b.dateTime.compareTo(a.dateTime));
+    } catch (e) {
+      error = e.toString();
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> saveManualEntry(JournalEntry entry) async {
+    isLoading = true;
+    notifyListeners();
+    try {
+      await _repository.saveEntry(entry);
+      await loadEntries(); // Refresh the list
+    } catch (e) {
+      error = e.toString();
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
   }
 }

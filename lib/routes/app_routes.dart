@@ -5,4 +5,5 @@ class AppRoutes {
   static const authLogin = '/auth/login';
   static const authSignUp = '/auth/signup';
   static const shell = '/shell';
+  static const allEntries = '/all-entries';
 }

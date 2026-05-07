@@ -1,7 +1,10 @@
 fastapi>=0.115.0
 uvicorn[standard]>=0.30.6
 pydantic>=2.11.0
+torch>=2.0.0
 transformers>=4.38.0
 safetensors>=0.4.0
 sentencepiece>=0.2.0
 numpy>=1.24.0
+requests>=2.31.0
+python-dotenv>=1.0.0

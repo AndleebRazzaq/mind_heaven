@@ -89,12 +89,14 @@ class JournalRepositoryImpl implements JournalRepository {
         intervention.detectedDistortionLabel,
       ),
       detectedDistortionLabel: intervention.detectedDistortionLabel,
-      confidenceLevel: intervention.confidence?.toString() ?? intervention.emotionConfidence?.toString(),
-      reframe: intervention.reframe,
-      eventSummary: intervention.insight,
-      coreBelief: intervention.pattern,
-      behavioralShiftPrompt: intervention.action,
-      reframeGenerationMode: 'local_llm',
+      confidenceLevel: intervention.confidenceLevel ?? intervention.certainty,
+      reframe: intervention.reframeGuidance,
+      eventSummary: intervention.eventSummary,
+      coreBelief: intervention.coreBeliefs.isEmpty
+          ? null
+          : intervention.coreBeliefs.first,
+      behavioralShiftPrompt: intervention.behavioralShiftPrompt,
+      reframeGenerationMode: intervention.reframeGenerationMode,
       plantSuggestion: intervention.plantSuggestion,
       moodLabel: intervention.moodLabel,
       stressBefore: stressBefore,
@@ -133,6 +135,20 @@ class JournalRepositoryImpl implements JournalRepository {
         entryId: entryId,
         stressAfter: stressAfter,
       );
+    }
+  }
+
+  @override
+  Future<List<JournalEntry>> getEntries() async {
+    return _storage.getJournalEntries();
+  }
+
+  @override
+  Future<void> saveEntry(JournalEntry entry) async {
+    await _storage.addJournalEntry(entry);
+    final user = await _authService.getCurrentUser();
+    if (user != null) {
+      await _cloudService.saveEntry(uid: user.uid, entry: entry);
     }
   }
 }

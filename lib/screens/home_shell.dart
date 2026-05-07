@@ -26,13 +26,27 @@ class _HomeShellState extends State<HomeShell> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        titleSpacing: 8,
-        title: Row(
-          children: const [_TopLogo(), SizedBox(width: 10), Text('Reframed')],
-        ),
+      appBar: _currentIndex != 0
+          ? AppBar(
+              titleSpacing: 16,
+              title: _currentIndex == 1
+                  ? const Text(
+                      'Learn',
+                      style: TextStyle(fontWeight: FontWeight.w700),
+                    )
+                  : Row(
+                      children: const [
+                        _TopLogo(),
+                        SizedBox(width: 10),
+                        Text('Reframed')
+                      ],
+                    ),
+            )
+          : null,
+      body: SafeArea(
+        top: _currentIndex == 0,
+        child: _screens[_currentIndex],
       ),
-      body: _screens[_currentIndex],
       bottomNavigationBar: _CustomBottomNavBar(
         selectedIndex: _currentIndex,
         onTap: (index) => setState(() => _currentIndex = index),
@@ -43,7 +57,7 @@ class _HomeShellState extends State<HomeShell> {
 
 class _TopLogo extends StatelessWidget {
   const _TopLogo();
-  static const String _logoAsset = 'assets/logo/reframed_logo.png';
+  static const String _logoAsset = 'assets/logo/reframed_logo_removebg.png';
 
   @override
   Widget build(BuildContext context) {

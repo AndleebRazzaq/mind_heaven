@@ -38,15 +38,6 @@ class _LearnCbtScreenState extends State<LearnCbtScreen> {
             context,
           ).textTheme.bodyMedium?.copyWith(color: Colors.blueGrey.shade300),
         ),
-        const SizedBox(height: 14),
-        TextField(
-          controller: _searchController,
-          onChanged: (value) => setState(() => _query = value.trim()),
-          decoration: const InputDecoration(
-            prefixIcon: Icon(Icons.search),
-            hintText: 'Search topics...',
-          ),
-        ),
         const SizedBox(height: 16),
         ...CbtLearnContent.categories.map(
           (c) => Padding(
@@ -233,8 +224,7 @@ class _CategoryCard extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Text(category.icon, style: const TextStyle(fontSize: 20)),
-            const SizedBox(width: 10),
+            const SizedBox(width: 4),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

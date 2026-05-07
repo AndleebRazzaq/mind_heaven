@@ -1,8 +1,14 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../presentation/providers/journal_provider.dart';
 import '../widgets/home_dialogs.dart';
 import 'journal_screen.dart';
+import 'check_in_screen.dart';
+import 'savoring_screen.dart';
+import '../models/journal_entry.dart';
+import '../routes/app_routes.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -13,202 +19,207 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<JournalProvider>().loadEntries();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(16, 20, 16, 32),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Header with date
-          _DateTimeHeader(),
-          const SizedBox(height: 24),
-
-          // Quick action cards
-          _QuickActionSection(
-            onCheckIn: _showCheckInDialog,
-            onSavoring: _showSavoringJournal,
-            onBreathe: _showBreathingExercise,
+          const _HomeCalendarHeader(),
+          _SectionTitle('Quick entries'),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: _QuickEntryCard(
+                  title: 'Check-in',
+                  icon: Icons.published_with_changes,
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const CheckInScreen()),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _QuickEntryCard(
+                  title: 'Savoring',
+                  icon: Icons.local_florist_outlined,
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const SavoringScreen()),
+                  ),
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 24),
 
-          // Mood grounding & plant suggestions
-          _MoodGroundingSection(),
+          _SectionTitle('Deep-dive journals'),
+          const SizedBox(height: 12),
+          _DeepDiveCard(
+            title: 'Thought journal',
+            description: 'Overcome unhelpful patterns.',
+            icon: Icons.draw_outlined,
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const JournalScreen()),
+            ),
+          ),
+          const SizedBox(height: 12),
+          _DeepDiveCard(
+            title: 'Exposure journal',
+            description: 'Fight your fears by facing them.',
+            icon: Icons.person_pin_circle_outlined,
+            onTap: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Exposure journal coming soon!')),
+              );
+            },
+          ),
           const SizedBox(height: 24),
 
-          // Emergency support section
-          _EmergencySupportSection(),
+          _SectionTitle('Other tools'),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: _ToolCard(
+                  title: 'Breathe',
+                  icon: Icons.air,
+                  onTap: _showBreathingExercise,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _ToolCard(
+                  title: 'Free-form',
+                  icon: Icons.note_alt_outlined,
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const JournalScreen()),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _ToolCard(
+                  title: 'Emergency',
+                  icon: Icons.support,
+                  onTap: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                          'Emergency contacts: 988 (US) | Local hotline',
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
           const SizedBox(height: 24),
 
-          // Completed entries list
-          _CompletedEntriesSection(),
-          const SizedBox(height: 20),
+          _SectionTitle('Completed entries'),
+          const SizedBox(height: 12),
+          _CompletedEntriesList(),
         ],
       ),
     );
   }
 
-  void _showCheckInDialog(BuildContext context) {
-    showDialog(context: context, builder: (ctx) => const CheckInDialog()).then((
-      result,
-    ) {
-      if (result != null && mounted) {
-        ScaffoldMessenger.of(
-          // ignore: use_build_context_synchronously
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Check-in saved!')));
-      }
-    });
-  }
-
-  void _showSavoringJournal(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (ctx) => const SavoringJournalDialog(),
-    ).then((result) {
-      if (result != null && mounted) {
-        ScaffoldMessenger.of(
-          // ignore: use_build_context_synchronously
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Gratitude saved!')));
-      }
-    });
-  }
-
-  void _showBreathingExercise(BuildContext context) {
-    showDialog(
+  Future<void> _showBreathingExercise() async {
+    final result = await showDialog(
       context: context,
       builder: (ctx) => const BreathingExerciseDialog(),
-    ).then((result) {
-      if (result != null && mounted) {
-        // ignore: use_build_context_synchronously
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Breathing exercise completed!')),
-        );
-      }
-    });
-  }
-}
-
-class _DateTimeHeader extends StatelessWidget {
-  const _DateTimeHeader();
-
-  @override
-  Widget build(BuildContext context) {
-    final now = DateTime.now();
-    final weekdays = [
-      'Monday',
-      'Tuesday',
-      'Wednesday',
-      'Thursday',
-      'Friday',
-      'Saturday',
-      'Sunday',
-    ];
-    const months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
-    ];
-
-    final dayName = weekdays[now.weekday - 1];
-    final month = months[now.month - 1];
-    final dateStr = '$dayName, $month ${now.day}';
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Welcome back',
-          style: Theme.of(
-            context,
-          ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w700),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          dateStr,
-          style: Theme.of(
-            context,
-          ).textTheme.bodyMedium?.copyWith(color: Colors.blueGrey.shade400),
-        ),
-      ],
+    );
+    if (!mounted || result == null) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Breathing exercise completed!')),
     );
   }
 }
 
-class _QuickActionSection extends StatelessWidget {
-  final Function(BuildContext) onCheckIn;
-  final Function(BuildContext) onSavoring;
-  final Function(BuildContext) onBreathe;
+class _SectionTitle extends StatelessWidget {
+  final String title;
+  const _SectionTitle(this.title);
 
-  const _QuickActionSection({
-    required this.onCheckIn,
-    required this.onSavoring,
-    required this.onBreathe,
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Text(
+        title.toUpperCase(),
+        style: const TextStyle(
+          color: Color(0xFFB4C6FC),
+          fontSize: 12,
+          fontWeight: FontWeight.w800,
+          letterSpacing: 1.2,
+        ),
+      ),
+    );
+  }
+}
+
+class _QuickEntryCard extends StatelessWidget {
+  final String title;
+  final IconData icon;
+  final VoidCallback onTap;
+
+  const _QuickEntryCard({
+    required this.title,
+    required this.icon,
+    required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Quick actions',
-          style: Theme.of(
-            context,
-          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+        decoration: BoxDecoration(
+          color: const Color(0xFF14161B),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
         ),
-        const SizedBox(height: 12),
-        _QuickActionCard(
-          title: 'Check-in',
-          description: 'Emotion + context',
-          icon: Icons.sentiment_satisfied_outlined,
-          onTap: () => onCheckIn(context),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, color: const Color(0xFFE4A4C1), size: 24),
+            const SizedBox(width: 8),
+            Text(
+              title,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
         ),
-        const SizedBox(height: 10),
-        _QuickActionCard(
-          title: 'Savoring',
-          description: 'Gratitude & joy',
-          icon: Icons.favorite_outline,
-          onTap: () => onSavoring(context),
-        ),
-        const SizedBox(height: 10),
-        _QuickActionCard(
-          title: 'Breathe',
-          description: 'Guided breathing',
-          icon: Icons.air_outlined,
-          onTap: () => onBreathe(context),
-        ),
-        const SizedBox(height: 10),
-        _QuickActionCard(
-          title: 'Free Journal',
-          description: 'Write freely',
-          icon: Icons.edit_outlined,
-          onTap: () => Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const JournalScreen()),
-          ),
-        ),
-      ],
+      ),
     );
   }
 }
 
-class _QuickActionCard extends StatelessWidget {
+class _DeepDiveCard extends StatelessWidget {
   final String title;
   final String description;
   final IconData icon;
   final VoidCallback onTap;
 
-  const _QuickActionCard({
+  const _DeepDiveCard({
     required this.title,
     required this.description,
     required this.icon,
@@ -217,50 +228,55 @@ class _QuickActionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return InkWell(
       onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
       child: Container(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
           color: const Color(0xFF14161B),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
         ),
         child: Row(
           children: [
             Container(
-              width: 48,
-              height: 48,
+              padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: const Color(0xFF1A1D25),
-                borderRadius: BorderRadius.circular(10),
+                color: const Color(0xFFB4C6FC).withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(12),
               ),
-              child: Icon(icon, color: const Color(0xFF60A5FA), size: 24),
+              child: Icon(icon, color: const Color(0xFFB4C6FC), size: 28),
             ),
-            const SizedBox(width: 12),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  description,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Colors.blueGrey.shade400,
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
-                ),
-              ],
+                  const SizedBox(height: 4),
+                  Text(
+                    description,
+                    style: TextStyle(
+                      color: Colors.grey.shade400,
+                      fontSize: 14,
+                      height: 1.4,
+                    ),
+                  ),
+                ],
+              ),
             ),
-            const Spacer(),
             Icon(
-              Icons.arrow_forward_ios,
-              size: 16,
-              color: Colors.blueGrey.shade500,
+              Icons.chevron_right_rounded,
+              color: Colors.grey.shade600,
+              size: 24,
             ),
           ],
         ),
@@ -269,350 +285,554 @@ class _QuickActionCard extends StatelessWidget {
   }
 }
 
-class _MoodGroundingSection extends StatelessWidget {
-  const _MoodGroundingSection();
+class _ToolCard extends StatelessWidget {
+  final String title;
+  final IconData icon;
+  final VoidCallback onTap;
 
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Mood grounding',
-          style: Theme.of(
-            context,
-          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
-        ),
-        const SizedBox(height: 12),
-        Container(
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-            color: const Color(0xFF151515),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Suggested plant for today',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Colors.blueGrey.shade300,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Snake Plant',
-                          style: Theme.of(context).textTheme.titleSmall
-                              ?.copyWith(color: Colors.greenAccent.shade200),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'Brings calm, steady structure',
-                          style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(color: Colors.blueGrey.shade400),
-                        ),
-                        const SizedBox(height: 6),
-                        Row(
-                          spacing: 10,
-                          children: [
-                            Text(
-                              '☀️ Bright',
-                              style: Theme.of(context).textTheme.bodySmall,
-                            ),
-                            Text(
-                              '💧 Monthly',
-                              style: Theme.of(context).textTheme.bodySmall,
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Container(
-                    width: 80,
-                    height: 80,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF101010),
-                      borderRadius: BorderRadius.circular(8),
-                      // ignore: deprecated_member_use
-                      border: Border.all(color: Colors.green.withOpacity(0.35)),
-                    ),
-                    child: const Icon(
-                      Icons.local_florist_outlined,
-                      color: Colors.greenAccent,
-                      size: 40,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _EmergencySupportSection extends StatelessWidget {
-  const _EmergencySupportSection();
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Need immediate support?',
-          style: Theme.of(
-            context,
-          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
-        ),
-        const SizedBox(height: 12),
-        Container(
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-            color: const Color(0xFF2A1A1A),
-            borderRadius: BorderRadius.circular(12),
-            // ignore: deprecated_member_use
-            border: Border.all(color: Colors.red.withOpacity(0.3)),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Row(
-                children: [
-                  Icon(
-                    Icons.warning_outlined,
-                    color: Colors.orange.shade300,
-                    size: 20,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Crisis Resources',
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: Colors.orange.shade200,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              Text(
-                'If you\'re in crisis or having thoughts of self-harm, please reach out:',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Colors.blueGrey.shade300,
-                ),
-              ),
-              const SizedBox(height: 10),
-              FilledButton.tonal(
-                style: FilledButton.styleFrom(
-                  // ignore: deprecated_member_use
-                  backgroundColor: Colors.red.withOpacity(0.1),
-                  foregroundColor: Colors.red.shade300,
-                ),
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text(
-                        'Emergency contacts: 988 (US) | Local hotline',
-                      ),
-                    ),
-                  );
-                },
-                child: const Text('View Crisis Resources'),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _CompletedEntriesSection extends StatelessWidget {
-  const _CompletedEntriesSection();
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'Recent reflections',
-              style: Theme.of(
-                context,
-              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
-            ),
-            TextButton(onPressed: () {}, child: const Text('See all')),
-          ],
-        ),
-        const SizedBox(height: 12),
-        Consumer<JournalProvider>(
-          builder: (context, journalProvider, _) {
-            // This would typically load entries from the provider
-            // For now, showing placeholder
-            return Column(
-              children: [
-                _EntryCard(
-                  date: 'Today',
-                  mood: 'Anxious',
-                  distortion: 'Catastrophizing',
-                  stressBefore: 8.0,
-                  stressAfter: 5.0,
-                ),
-                const SizedBox(height: 10),
-                _EntryCard(
-                  date: 'Yesterday',
-                  mood: 'Frustrated',
-                  distortion: 'All-or-nothing',
-                  stressBefore: 7.0,
-                  stressAfter: 4.0,
-                ),
-                const SizedBox(height: 10),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 12,
-                  ),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF14161B),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.06),
-                    ),
-                  ),
-                  child: Center(
-                    child: Text(
-                      'No more entries',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Colors.blueGrey.shade400,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            );
-          },
-        ),
-      ],
-    );
-  }
-}
-
-class _EntryCard extends StatelessWidget {
-  final String date;
-  final String mood;
-  final String distortion;
-  final double stressBefore;
-  final double stressAfter;
-
-  const _EntryCard({
-    required this.date,
-    required this.mood,
-    required this.distortion,
-    required this.stressBefore,
-    required this.stressAfter,
+  const _ToolCard({
+    required this.title,
+    required this.icon,
+    required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    final stressReduction = ((stressBefore - stressAfter) / stressBefore * 100)
-        .toStringAsFixed(0);
-
-    return GestureDetector(
-      onTap: () {},
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
       child: Container(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 4),
         decoration: BoxDecoration(
           color: const Color(0xFF14161B),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
         ),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  date,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Colors.blueGrey.shade400,
+            Icon(icon, color: const Color(0xFFB4C6FC), size: 24),
+            const SizedBox(height: 8),
+            Text(
+              title,
+              style: const TextStyle(
+                color: Color(0xFFB4C6FC),
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+              textAlign: TextAlign.center,
+              maxLines: 1,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _CompletedEntriesList extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<JournalProvider>(
+      builder: (context, journalProvider, _) {
+        if (journalProvider.isLoading && journalProvider.entries.isEmpty) {
+          return const Center(
+            child: Padding(
+              padding: EdgeInsets.all(32.0),
+              child: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation(Color(0xFF8A6BFF)),
+              ),
+            ),
+          );
+        }
+
+        final entries = journalProvider.entries;
+        if (entries.isEmpty) {
+          return Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: const Color(0xFF14161B),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+            ),
+            child: const Center(
+              child: Text(
+                'No entries yet. Start journaling to see them here!',
+                style: TextStyle(color: Colors.grey, fontSize: 14),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          );
+        }
+
+        final displayEntries = entries.take(3).toList();
+
+        return Column(
+          children: [
+            ListView.separated(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: displayEntries.length,
+              separatorBuilder: (context, index) => const SizedBox(height: 12),
+              itemBuilder: (context, index) {
+                final entry = displayEntries[index];
+                IconData icon = Icons.note_alt_outlined;
+                Color iconColor = const Color(0xFFB4C6FC);
+
+                if (entry.tags.contains('savoring')) {
+                  icon = Icons.local_florist_outlined;
+                  iconColor = const Color(0xFFE4A4C1);
+                } else if (entry.tags.contains('ai-journal')) {
+                  icon = Icons.auto_awesome;
+                  iconColor = const Color(0xFF8A6BFF);
+                } else if (entry.tags.contains('check-in')) {
+                  icon = Icons.published_with_changes;
+                  iconColor = const Color(0xFFB4C6FC);
+                }
+
+                return _CompletedEntryItem(
+                  entry: entry,
+                  icon: icon,
+                  iconColor: iconColor,
+                  title: entry.eventSummary ?? 'Journal Entry',
+                  subtitle: entry.content,
+                );
+              },
+            ),
+            if (entries.length > 3) ...[
+              const SizedBox(height: 16),
+              GestureDetector(
+                onTap: () => Navigator.pushNamed(context, AppRoutes.allEntries),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF8A6BFF).withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: const Color(0xFF8A6BFF).withValues(alpha: 0.2)),
+                  ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'See All Entries',
+                        style: TextStyle(
+                          color: Color(0xFF8A6BFF),
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      SizedBox(width: 4),
+                      Icon(Icons.arrow_forward_ios_rounded, color: Color(0xFF8A6BFF), size: 12),
+                    ],
                   ),
                 ),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    // ignore: deprecated_member_use
-                    color: Colors.green.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
+              ),
+            ],
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _CompletedEntryItem extends StatelessWidget {
+  final JournalEntry entry;
+  final IconData icon;
+  final Color iconColor;
+  final String title;
+  final String subtitle;
+
+  const _CompletedEntryItem({
+    required this.entry,
+    required this.icon,
+    required this.iconColor,
+    required this.title,
+    required this.subtitle,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xFF14161B),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+      ),
+      child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        leading: Container(
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: iconColor.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Icon(icon, color: iconColor, size: 22),
+        ),
+        title: Text(
+          title,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 15,
+            fontWeight: FontWeight.w600,
+          ),
+      ),
+      subtitle: Padding(
+        padding: const EdgeInsets.only(top: 4.0),
+        child: Text(
+          subtitle,
+          style: TextStyle(
+            color: Colors.grey.shade400,
+            fontSize: 13,
+            height: 1.4,
+          ),
+          maxLines: 5,
+          overflow: TextOverflow.ellipsis,
+        ),
+      ),
+      trailing: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Text(
+            '${entry.dateTime.day}/${entry.dateTime.month}',
+            style: TextStyle(
+              color: Colors.grey.shade500,
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Icon(Icons.chevron_right_rounded, color: Colors.grey.shade700, size: 16),
+        ],
+      ),
+      onTap: () {
+        showModalBottomSheet(
+          context: context,
+          isScrollControlled: true,
+          backgroundColor: Colors.transparent,
+          builder: (context) => _EntryDetailSheet(
+            entry: entry,
+            title: title,
+            icon: icon,
+            iconColor: iconColor,
+          ),
+        );
+      },
+    ));
+  }
+}
+
+class _EntryDetailSheet extends StatelessWidget {
+  final JournalEntry entry;
+  final String title;
+  final IconData icon;
+  final Color iconColor;
+
+  const _EntryDetailSheet({
+    required this.entry,
+    required this.title,
+    required this.icon,
+    required this.iconColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final dateFormat = DateFormat('EEE, MMM d - h:mm a');
+    final isAiJournal = entry.tags.contains('ai-journal');
+    final isCheckIn = entry.tags.contains('check-in');
+    final isSavoring = entry.tags.contains('savoring');
+
+    return Container(
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.of(context).size.height * 0.85,
+      ),
+      padding: const EdgeInsets.all(24),
+      decoration: const BoxDecoration(
+        color: Color(0xFF14161B),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      child: SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.white24,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+            Row(
+              children: [
+                Icon(icon, color: iconColor, size: 28),
+                const SizedBox(width: 12),
+                Expanded(
                   child: Text(
-                    '↓ $stressReduction%',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Colors.greenAccent.shade200,
-                      fontWeight: FontWeight.w600,
+                    title,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 22,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 8),
-            Row(
-              spacing: 8,
-              children: [
-                Chip(
-                  label: Text(mood),
-                  labelStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Colors.blueGrey.shade200,
-                  ),
-                  backgroundColor: const Color(0xFF1A1D25),
-                  side: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
-                ),
-                Chip(
-                  label: Text(distortion),
-                  labelStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Colors.blueGrey.shade200,
-                  ),
-                  backgroundColor: const Color(0xFF1A1D25),
-                  side: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
-                ),
-              ],
+            Text(
+              dateFormat.format(entry.dateTime),
+              style: TextStyle(
+                color: Colors.grey.shade400,
+                fontSize: 14,
+              ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 24),
+            Flexible(
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (isAiJournal || isCheckIn) ...[
+                      if (entry.moodLabel != null && entry.moodLabel!.isNotEmpty) ...[
+                        _DetailSectionTitle('Mood', color: const Color(0xFFB4C6FC)),
+                        const SizedBox(height: 8),
+                        Text(
+                          entry.moodLabel!,
+                          style: const TextStyle(color: Colors.white, fontSize: 16),
+                        ),
+                        const SizedBox(height: 16),
+                      ],
+                    ],
+                    if (isAiJournal) ...[
+                      if (entry.detectedDistortionLabel != null && entry.detectedDistortionLabel!.isNotEmpty) ...[
+                        _DetailSectionTitle('Pattern', color: const Color(0xFF8A6BFF)),
+                        const SizedBox(height: 8),
+                        Text(
+                          entry.detectedDistortionLabel!,
+                          style: const TextStyle(color: Colors.white, fontSize: 16),
+                        ),
+                        const SizedBox(height: 16),
+                      ],
+                      if (entry.reframe != null && entry.reframe!.isNotEmpty) ...[
+                        _DetailSectionTitle('Reframe', color: const Color(0xFF8A6BFF)),
+                        const SizedBox(height: 8),
+                        Text(
+                          entry.reframe!,
+                          style: const TextStyle(color: Colors.white, fontSize: 16, height: 1.5),
+                        ),
+                        const SizedBox(height: 16),
+                      ],
+                    ],
+                    if (isSavoring && entry.eventSummary != null) ...[
+                        _DetailSectionTitle('Contextual factor', color: const Color(0xFFE4A4C1)),
+                      const SizedBox(height: 8),
+                      Text(
+                        entry.eventSummary!,
+                        style: const TextStyle(color: Colors.white, fontSize: 16, height: 1.5),
+                      ),
+                      const SizedBox(height: 16),
+                    ],
+                    _DetailSectionTitle('Entry', color: iconColor),
+                    const SizedBox(height: 8),
+                    Text(
+                      entry.content,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        height: 1.6,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _DetailSectionTitle extends StatelessWidget {
+  final String title;
+  final Color color;
+  const _DetailSectionTitle(this.title, {required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      title,
+      style: TextStyle(
+        color: color,
+        fontSize: 14,
+        fontWeight: FontWeight.w600,
+      ),
+    );
+  }
+}
+
+class _HomeCalendarHeader extends StatefulWidget {
+  const _HomeCalendarHeader();
+
+  @override
+  State<_HomeCalendarHeader> createState() => _HomeCalendarHeaderState();
+}
+
+class _HomeCalendarHeaderState extends State<_HomeCalendarHeader> {
+  final ScrollController _scrollController = ScrollController();
+  late DateTime _today;
+  late List<DateTime> _weekDays;
+
+  @override
+  void initState() {
+    super.initState();
+    _today = DateTime.now();
+    _weekDays = _getWeekDays(_today);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _scrollToToday();
+    });
+  }
+
+  List<DateTime> _getWeekDays(DateTime date) {
+    int currentDay = date.weekday;
+    DateTime startOfWeek = date.subtract(Duration(days: currentDay - 1));
+    return List.generate(7, (index) => startOfWeek.add(Duration(days: index)));
+  }
+
+  void _scrollToToday() {
+    if (!_scrollController.hasClients) return;
+    int todayIndex = _weekDays.indexWhere((d) => d.day == _today.day && d.month == _today.month);
+    if (todayIndex == -1) return;
+    
+    final double screenWidth = MediaQuery.of(context).size.width;
+    double offset = (todayIndex * 64.0) - (screenWidth / 2) + 32;
+    if (offset < 0) offset = 0;
+    
+    _scrollController.animateTo(
+      offset,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final dateFormat = DateFormat('d MMM');
+    final dayFormat = DateFormat('EEE');
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // Date and dropdown
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              'Today, ${dateFormat.format(_today)}',
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(width: 4),
+            Icon(
+              Icons.keyboard_arrow_down_rounded,
+              color: Colors.grey.shade400,
+              size: 24,
+            ),
+          ],
+        ),
+        const SizedBox(height: 24),
+
+        // Days Row
+        SingleChildScrollView(
+          controller: _scrollController,
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: _weekDays.map((date) {
+              bool isToday = date.day == _today.day && date.month == _today.month && date.year == _today.year;
+              return _buildDayBox(
+                context, 
+                dayFormat.format(date), 
+                isSelected: isToday,
+              );
+            }).toList(),
+          ),
+        ),
+        const SizedBox(height: 24),
+      ],
+    );
+  }
+
+  Widget _buildDayBox(
+    BuildContext context,
+    String day, {
+    bool isSelected = false,
+    bool isFirstEntry = false,
+  }) {
+    return Container(
+      width: isFirstEntry ? 76 : 46,
+      height: 52,
+      margin: const EdgeInsets.only(right: 12),
+      decoration: BoxDecoration(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: isSelected
+              ? const Color(0xFFE4A4C1)
+              : (isFirstEntry ? Colors.grey.shade700 : const Color(0xFF2C2C30)),
+          width: isSelected ? 1.5 : 1,
+        ),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            day,
+            style: TextStyle(
+              color: isSelected || isFirstEntry
+                  ? Colors.white
+                  : Colors.grey.shade600,
+              fontWeight: isSelected || isFirstEntry
+                  ? FontWeight.w600
+                  : FontWeight.normal,
+              fontSize: 13,
+            ),
+          ),
+          if (isFirstEntry) ...[
+            const SizedBox(height: 4),
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: const [
                 Text(
-                  'Stress: $stressBefore → $stressAfter',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Colors.blueGrey.shade400,
+                  'First entry ',
+                  style: TextStyle(
+                    color: Color(0xFFE4A4C1),
+                    fontSize: 11,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
-                Icon(
-                  Icons.arrow_forward_ios,
-                  size: 14,
-                  color: Colors.blueGrey.shade500,
+                Icon(Icons.check, color: Color(0xFFE4A4C1), size: 12),
+                Text(
+                  '2',
+                  style: TextStyle(color: Color(0xFFE4A4C1), fontSize: 10),
                 ),
               ],
             ),
           ],
-        ),
+        ],
       ),
     );
   }

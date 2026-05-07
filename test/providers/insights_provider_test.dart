@@ -1,9 +1,28 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mind_heaven/presentation/providers/insights_provider.dart';
 import 'package:mind_heaven/services/analytics_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class _FakeAnalyticsServiceSuccess extends AnalyticsService {
   _FakeAnalyticsServiceSuccess() : super();
+
+  @override
+  Future<WeeklyAnalyticsSnapshot> getWeeklyAnalyticsSnapshot({
+    AnalyticsRange range = AnalyticsRange.thisWeek,
+  }) async {
+    return WeeklyAnalyticsSnapshot(
+      moodTrend: await getWeeklyMoodTrend(),
+      topEmotion: 'Calm',
+      topPattern: 'magnification',
+      aiSummary: 'Improved',
+      moodInsight: 'Mood is stable',
+      emotionPercentages: const {'Calm': 1},
+      topPatternCount: 1,
+      allPatternCounts: const {'magnification': 1},
+      growthInsight: 'Growth is visible',
+      triggerInsight: null,
+    );
+  }
 
   @override
   Future<List<MoodDataPoint>> getWeeklyMoodTrend() async {
@@ -25,10 +44,7 @@ class _FakeAnalyticsServiceSuccess extends AnalyticsService {
 
   @override
   Future<ImprovementSummary> getImprovementSummary() async {
-    return ImprovementSummary(
-      stressImproved: true,
-      message: 'Improved',
-    );
+    return ImprovementSummary(stressImproved: true, message: 'Improved');
   }
 
   @override
@@ -46,13 +62,23 @@ class _FakeAnalyticsServiceError extends AnalyticsService {
   _FakeAnalyticsServiceError() : super();
 
   @override
+  Future<WeeklyAnalyticsSnapshot> getWeeklyAnalyticsSnapshot({
+    AnalyticsRange range = AnalyticsRange.thisWeek,
+  }) async {
+    throw Exception('analytics failed');
+  }
+
+  @override
   Future<List<MoodDataPoint>> getWeeklyMoodTrend() async {
     throw Exception('analytics failed');
   }
 }
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   test('InsightsProvider load success fills fields', () async {
+    SharedPreferences.setMockInitialValues({});
     final provider = InsightsProvider(_FakeAnalyticsServiceSuccess());
     await provider.load();
 
@@ -65,6 +91,7 @@ void main() {
   });
 
   test('InsightsProvider load error sets error', () async {
+    SharedPreferences.setMockInitialValues({});
     final provider = InsightsProvider(_FakeAnalyticsServiceError());
     await provider.load();
 

@@ -15,17 +15,17 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   final List<_OnboardingPage> _pages = [
     const _OnboardingPage(
-      imagePath: 'assets/onboarding/onboard_1.jpg',
+      imagePath: 'assets/onboarding/onboard_1.png',
       title: 'Understand Your Thoughts',
       subtitle: 'Learn to identify and challenge negative thought patterns.',
     ),
     const _OnboardingPage(
-      imagePath: 'assets/onboarding/onboard_2.jpg',
+      imagePath: 'assets/onboarding/onboard_2.png',
       title: 'Track Your Emotions',
       subtitle: 'Monitor your emotional state and patterns over time.',
     ),
     const _OnboardingPage(
-      imagePath: 'assets/onboarding/onboard_3.jpg',
+      imagePath: 'assets/onboarding/onboard_3.png',
       title: 'Build Resilience',
       subtitle: 'Develop a healthier mindset with proven CBT techniques.',
     ),
@@ -57,7 +57,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFF101216),
       body: SafeArea(
         child: Column(
           children: [
@@ -89,34 +89,46 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           color: index == _currentPage
-                              ? const Color(0xFF1387E8)
-                              : const Color(0xFFE3E3E3),
+                              ? const Color(0xFFB4C6FC)
+                              : Colors.white.withValues(alpha: 0.2),
                         ),
                       ),
                     ),
                   ),
-                  const SizedBox(height: 24),
-                  SizedBox(
+                  const SizedBox(height: 32),
+                  // Gradient Button "Elevate" / "Next"
+                  Container(
                     width: double.infinity,
-                    child: FilledButton(
-                      onPressed: _nextPage,
-                      style: FilledButton.styleFrom(
-                        backgroundColor: const Color(0xFF1387E8),
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        elevation: 8,
-                        // ignore: deprecated_member_use
-                        shadowColor: const Color(0xFF1387E8).withOpacity(0.4),
+                    height: 56,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFF8A6BFF), Color(0xFFE4A4C1)],
+                        begin: Alignment.centerLeft,
+                        end: Alignment.centerRight,
                       ),
-                      child: Text(
-                        _currentPage == _pages.length - 1
-                            ? 'Get Started'
-                            : 'Next',
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700,
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFF8A6BFF).withValues(alpha: 0.3),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(12),
+                        onTap: _nextPage,
+                        child: Center(
+                          child: Text(
+                            'Next',
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w700,
+                              color: Color(0xFF101216),
+                            ),
+                          ),
                         ),
                       ),
                     ),
@@ -136,24 +148,26 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Image.asset(page.imagePath, height: 280, fit: BoxFit.contain),
+          Image.asset(page.imagePath, height: 320, fit: BoxFit.contain),
           const SizedBox(height: 48),
           Text(
             page.title,
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              color: const Color(0xFF161B22),
-              fontWeight: FontWeight.w900,
-            ),
+                  color: Colors.white,
+                  fontWeight: FontWeight.w900,
+                  fontSize: 28,
+                ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
           Text(
             page.subtitle,
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              color: const Color(0xFF727272),
-              height: 1.35,
-            ),
+                  color: Colors.grey.shade400,
+                  height: 1.4,
+                  fontSize: 16,
+                ),
           ),
         ],
       ),

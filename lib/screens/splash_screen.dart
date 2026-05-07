@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import '../app/router.dart';
 import '../features/auth/data/repositories/session_repository_impl.dart';
@@ -13,17 +15,44 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> {
-  static const String _logoAsset = 'assets/logo/reframed_logo.svg';
+class _SplashScreenState extends State<SplashScreen>
+    with SingleTickerProviderStateMixin {
+  static const String _logoAsset = 'assets/logo/reframed logo.png';
+  late AnimationController _controller;
+  late Animation<double> _fadeAnimation;
+  late Animation<double> _scaleAnimation;
+  Timer? _navigationTimer;
 
   @override
   void initState() {
     super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1500),
+    );
+    _fadeAnimation = CurvedAnimation(parent: _controller, curve: Curves.easeIn);
+    _scaleAnimation = Tween<double>(
+      begin: 0.8,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutBack));
+    _controller.forward();
     _navigate();
   }
 
+  @override
+  void dispose() {
+    _navigationTimer?.cancel();
+    _controller.dispose();
+    super.dispose();
+  }
+
   Future<void> _navigate() async {
-    await Future.delayed(const Duration(milliseconds: 2200));
+    final completer = Completer<void>();
+    _navigationTimer = Timer(
+      const Duration(milliseconds: 3000),
+      completer.complete,
+    );
+    await completer.future;
     if (!mounted) return;
     final controller = SplashController(
       sessionRepository: SessionRepositoryImpl(AuthService()),
@@ -50,20 +79,26 @@ class _SplashScreenState extends State<SplashScreen> {
       backgroundColor: const Color(0xFF0A0A0A), // Black background
       body: SafeArea(
         child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Image.asset(
-                _logoAsset,
-                width: 240,
-                fit: BoxFit.contain,
-                errorBuilder: (context, error, stackTrace) => const Icon(
-                  Icons.psychology,
-                  size: 90,
-                  color: Color(0xFFB4C6FC),
-                ),
+          child: FadeTransition(
+            opacity: _fadeAnimation,
+            child: ScaleTransition(
+              scale: _scaleAnimation,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Image.asset(
+                    _logoAsset,
+                    width: 260,
+                    fit: BoxFit.contain,
+                    errorBuilder: (context, error, stackTrace) => const Icon(
+                      Icons.psychology,
+                      size: 100,
+                      color: Color(0xFFB4C6FC),
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),

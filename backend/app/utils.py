@@ -3,24 +3,19 @@ import json
 import torch
 import torch.nn.functional as F
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
+import requests
 from dotenv import load_dotenv
 
 load_dotenv()
-DEVICE = torch.device("cpu")
 
+DEVICE = torch.device("cpu")
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-# ==============================
-# PATHS
-# ==============================
+# Paths
+emotion_path = os.path.join(BASE_DIR, "models", "emotion_goemotions_model")
+cbt_path = os.path.join(BASE_DIR, "models", "cbt_distortion_model_impr")
 
-emotion_path = os.getenv("EMOTION_MODEL_PATH", os.path.join(BASE_DIR, "models", "emotion_goemotions_model"))
-cbt_path = os.getenv("CBT_MODEL_PATH", os.path.join(BASE_DIR, "models", "cbt_distortion_model_impr"))
-
-# ==============================
-# LOAD MODELS
-# ==============================
-
+# Models
 emotion_tokenizer = AutoTokenizer.from_pretrained(emotion_path)
 emotion_model = AutoModelForSequenceClassification.from_pretrained(emotion_path)
 emotion_model.to(DEVICE)
@@ -31,10 +26,7 @@ cbt_model = AutoModelForSequenceClassification.from_pretrained(cbt_path)
 cbt_model.to(DEVICE)
 cbt_model.eval()
 
-# =========================================================
-# 🔥 FIX 1 — EMOTION LABEL NAMES
-# =========================================================
-
+# Emotion Labels
 label_names = [
     "admiration","amusement","anger","annoyance","approval","caring",
     "confusion","curiosity","desire","disappointment","disapproval",
@@ -42,229 +34,175 @@ label_names = [
     "joy","love","nervousness","optimism","pride","realization",
     "relief","remorse","sadness","surprise","neutral"
 ]
+emotion_model.config.id2label = {i: label for i, label in enumerate(label_names)}
 
-id2label = {i: label for i, label in enumerate(label_names)}
-label2id = {label: i for i, label in enumerate(label_names)}
-
-emotion_model.config.id2label = id2label
-emotion_model.config.label2id = label2id
-
-# =========================================================
-# 🔥 FIX 2 — LOAD CBT LABEL MAP (SAFE)
-# =========================================================
-
+# CBT Labels
 distortion_label_path = os.path.join(cbt_path, "distortion_label_map.json")
 if not os.path.exists(distortion_label_path):
     distortion_label_path = os.path.join(cbt_path, "distortion_lable_map.json")
 
 with open(distortion_label_path) as f:
     distortion_map = json.load(f)
-
-# ✅ Handle wrapped JSON structure
-if isinstance(distortion_map, dict) and "label_map" in distortion_map:
+if "label_map" in distortion_map:
     distortion_map = distortion_map["label_map"]
+cbt_model.config.id2label = {int(k): v for k, v in distortion_map.items()}
 
-# ✅ Safe conversion
-id2label_cbt = {}
-for k, v in distortion_map.items():
-    try:
-        id2label_cbt[int(k)] = v
-    except ValueError:
-        print(f"[WARNING] Skipping invalid key in label map: {k}")
-
-cbt_model.config.id2label = id2label_cbt
-
-# ==============================
-# EMOTION PREDICTION
-# ==============================
-
-def predict_emotion(text: str):
-    inputs = emotion_tokenizer(
-        text,
-        return_tensors="pt",
-        truncation=True,
-        padding=True
-    ).to(DEVICE)
-
-    with torch.no_grad():
-        logits = emotion_model(**inputs).logits
-
-    probs = F.softmax(logits, dim=1)
-    confidence, idx = torch.max(probs, dim=1)
-
-    label = emotion_model.config.id2label.get(idx.item(), "unknown")
-
-    return {
-        "label": label,
-        "confidence": round(confidence.item(), 4)
-    }
-
-# ==============================
-# CBT DISTORTION PREDICTION
-# ==============================
-
-def predict_distortion(text: str):
-    inputs = cbt_tokenizer(
-        text,
-        return_tensors="pt",
-        truncation=True,
-        padding=True
-    ).to(DEVICE)
-
-    with torch.no_grad():
-        logits = cbt_model(**inputs).logits
-
-    probs = F.softmax(logits, dim=1)
-    confidence, idx = torch.max(probs, dim=1)
-
-    label = cbt_model.config.id2label.get(idx.item(), "unknown")
-
-    return {
-        "label": label,
-        "confidence": round(confidence.item(), 4)
-    }
-
-# ==============================
-# INTENSITY MAPPING (0-100)
-# ==============================
-
-def map_intensity(confidence: float):
-    """Scale confidence (0–1) → intensity (0–100)"""
-    return int(confidence * 100)
-
-# ==============================
-# LLM LAYER (Ollama / Local Llama 3)
-# ==============================
-
-import requests
-
-
+# Ollama Settings
 OLLAMA_URL = os.getenv("OLLAMA_URL", "http://localhost:11434/api/generate")
 OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3.2:1b")
 
 SYSTEM_PROMPT = """
 You are a calm, supportive CBT-based journaling assistant.
-
-Your role is to help users understand their thoughts and gently guide them toward more balanced thinking.
+Your goal is to help the user feel understood, identify the thinking pattern, gently reframe and suggest a small helpful action, and one indoor plant accordingto mood.
 
 Rules:
 - Be non-judgmental and empathetic
 - Do NOT diagnose or label the user
-- Do NOT use harsh or absolute language
 - Keep responses short, clear, and supportive
-- Use simple, human language, not clinical or academic
-- Focus on reflection, not advice-giving
-- Normalize emotions without reinforcing negative beliefs
-- Do NOT ask questions
+- Use simple, human language
 - Output STRICT JSON only
-
-Your goal is:
-Help the user feel understood, identify the thinking pattern, gently reframe, and suggest a small helpful action.
 """
 
-# ==============================
-# PROMPT BUILDER
-# ==============================
+# 1. Context Definitions
+SOCIAL_CONTEXT = ["people", "presentation", "class", "meeting", "talk", "crowd", "friend", "social", "party"]
+PERFORMANCE_CONTEXT = ["exam", "test", "deadline", "assignment", "work", "job", "interview", "performance", "score"]
+HEALTH_CONTEXT = ["health", "sick", "body", "pain", "hospital", "doctor", "weight", "sleep", "tired"]
 
-def build_prompt(text, emotion, intensity, distortion):
-    """Build a CBT-style prompt with stress-level guidance."""
+def map_emotion_group(label):
+    if label in ["fear", "nervousness", "confusion"]:
+        return "anxiety"
+    elif label in ["anger", "annoyance", "disappointment", "disapproval", "disgust"]:
+        return "stress"
+    elif label in ["sadness", "grief", "remorse", "embarrassment"]:
+        return "low_mood"
+    elif label in ["joy", "gratitude", "love", "relief", "optimism", "pride", "excitement", "admiration", "approval", "caring"]:
+        return "positive"
+    return "neutral"
 
-    if intensity >= 70:
-        stress_instruction = """
-Additional Instruction:
-The user appears to be experiencing high emotional intensity.
+def detect_context(text):
+    text = text.lower()
+    if any(word in text for word in SOCIAL_CONTEXT):
+        return "social"
+    elif any(word in text for word in PERFORMANCE_CONTEXT):
+        return "performance"
+    elif any(word in text for word in HEALTH_CONTEXT):
+        return "health"
+    return "general"
 
-- Keep the response extra calming
-- Prioritize grounding and safety
-- Suggest a simple breathing or grounding exercise
-- Keep language very gentle and slow-paced
-"""
+def get_intensity_label(intensity):
+    if intensity < 40: return "Mild"
+    if intensity < 70: return "Moderate"
+    if intensity < 85: return "High"
+    return "Very High"
+
+def predict_emotion(text):
+    inputs = emotion_tokenizer(text, return_tensors="pt", truncation=True, padding=True).to(DEVICE)
+    with torch.no_grad():
+        logits = emotion_model(**inputs).logits
+    probs = F.softmax(logits, dim=1)
+    confidence, idx = torch.max(probs, dim=1)
+    
+    label = emotion_model.config.id2label.get(idx.item(), "neutral")
+    conf_val = round(confidence.item(), 4)
+    intensity = int(conf_val * 100)
+    
+    emotion_group = map_emotion_group(label)
+    context = detect_context(text)
+    intensity_label = get_intensity_label(intensity)
+    
+    # Final label combination (Human-readable "Emotional State")
+    if emotion_group == "anxiety":
+        final_label = f"{context.capitalize()} Anxiety" if context != "general" else "Anxiety"
+    elif emotion_group == "low_mood":
+        final_label = f"{context.capitalize()} Low Mood" if context != "general" else "Emotional Exhaustion"
+    elif emotion_group == "stress":
+        final_label = f"{context.capitalize()} Stress" if context != "general" else "Stress"
+    elif emotion_group == "positive":
+        final_label = f"{context.capitalize()} Positive Shift" if context != "general" else label.capitalize()
     else:
-        stress_instruction = """
-Additional Instruction:
-The user is not in high distress.
+        final_label = label.capitalize()
 
-- Focus more on reflection and awareness
-- Encourage balanced thinking
-- Suggest a journaling or perspective-shift action
-"""
+    return {
+        "raw_label": label,
+        "emotion_group": emotion_group,
+        "context": context,
+        "intensity": intensity,
+        "intensity_label": intensity_label,
+        "final_label": final_label,
+        "confidence": conf_val
+    }
 
-    return f"""
-User Journal Entry:
-"{text}"
+def get_plant_suggestion(emotion_group):
+    mapping = {
+        "anxiety": "A Peace Lily may help create a calmer and clearer space.",
+        "stress": "A Jasmine plant can help soothe and refresh your environment.",
+        "low_mood": "An Aloe Vera plant may help bring a sense of healing and renewal.",
+        "positive": "A bright Sunflower can help maintain your positive energy.",
+        "neutral": "A Spider Plant is perfect for steady, grounded growth."
+    }
+    return mapping.get(emotion_group, "A Lucky Bamboo may help create a calmer and clearer space.")
 
-Detected Emotion: {emotion} ({intensity}% intensity)
-Detected Thinking Pattern: {distortion}
+def predict_distortion(text):
+    inputs = cbt_tokenizer(text, return_tensors="pt", truncation=True, padding=True).to(DEVICE)
+    with torch.no_grad():
+        logits = cbt_model(**inputs).logits
+    probs = F.softmax(logits, dim=1)
+    confidence, idx = torch.max(probs, dim=1)
+    return {"label": cbt_model.config.id2label.get(idx.item(), "none"), "confidence": round(confidence.item(), 4)}
 
-Instructions:
-Analyze the journal and return a CBT-style response in JSON format.
+def extract_json(text):
+    text = text.strip()
+    if "```json" in text:
+        text = text.split("```json")[1].split("```")[0].strip()
+    elif "```" in text:
+        text = text.split("```")[1].split("```")[0].strip()
+    start = text.find('{')
+    end = text.rfind('}')
+    if start != -1 and end != -1:
+        text = text[start:end+1]
+    return json.loads(text)
 
-Guidelines:
-1. Start by gently reflecting the user's emotion
-2. Briefly explain the thinking pattern in simple terms
-3. Offer a balanced reframe, not overly positive, just realistic
-4. Suggest ONE small actionable step
-5. Suggest a calming plant based on the user's emotional state in one short sentence
-
-Important:
-- Keep tone calm and supportive
-- Avoid absolute words like "always" and "never"
-- Do not invalidate the user's feelings
-- Keep each response concise, 1-2 sentences max per field
-
-Safety:
-If the user expresses extreme distress, hopelessness, or self-harm thoughts:
-- Do NOT provide analysis
-- Respond with supportive language
-- Encourage seeking help from a trusted person or professional
-
-{stress_instruction}
-
-Return ONLY JSON:
-
-{{
-  "insight": "",
-  "pattern": "",
-  "reframe": "",
-  "action": "",
-  "plant": ""
-}}
-"""
-
-# ==============================
-# LLM CALL
-# ==============================
-
-def generate_ai_response(prompt):
-    """Call local Ollama model and parse JSON response"""
+def get_ai_response(text, emotion_data, distortion):
+    intensity = emotion_data["intensity"]
+    final_label = emotion_data["final_label"]
+    
+    stress_instruction = "Priority: Grounding and safety. Keep it extra calming." if intensity >= 70 else "Focus: Perspective-shift and reflection."
+    
+    prompt = f"""
+    User: "{text}"
+    Detected: Emotional State={final_label} ({intensity}%), Pattern={distortion}
+    
+    Task: Return JSON with these fields:
+    - "insight": A warm, human subtitle explaining the {final_label} (e.g. "You seem mentally overwhelmed while trying to...")
+    - "pattern_explanation": A simple, empathetic explanation of why this pattern is happening.
+    - "reframe": A realistic, CBT-aligned balanced alternative thought (avoid toxic positivity).
+    - "action": One small, concrete helpful step.
+    
+    {stress_instruction}
+    """
     
     try:
-        full_prompt = f"{SYSTEM_PROMPT}\n\n{prompt}"
         response = requests.post(
             OLLAMA_URL,
             json={
                 "model": OLLAMA_MODEL,
-                "prompt": full_prompt,
+                "prompt": f"{SYSTEM_PROMPT}\n\n{prompt}",
                 "stream": False,
-                "format": "json",
-                "options": {
-                    "temperature": 0.6,
-                    "num_predict": 500
-                }
+                "format": "json"
             },
             timeout=120
         )
         response.raise_for_status()
-
-        content = response.json()["response"].strip()
-        return json.loads(content)
-    
+        ai_data = extract_json(response.json()["response"])
+        # Inject the mapped plant suggestion
+        ai_data["plant"] = get_plant_suggestion(emotion_data["emotion_group"])
+        return ai_data
     except Exception as e:
         print(f"[LLM ERROR] {str(e)}")
         return {
-            "insight": "It seems like you're going through something difficult.",
-            "pattern": "Your thoughts may feel overwhelming.",
-            "reframe": "This situation may be more manageable than it feels.",
-            "action": "Taking a short break or stepping outside might help.",
-            "plant": "A peace lily can help create a calming environment."
+            "insight": f"You seem to be navigating some {final_label.lower()} right now.",
+            "pattern_explanation": f"It's common for our minds to use {distortion} when we feel under pressure.",
+            "reframe": "Try to look at this from a balanced perspective, one small step at a time.",
+            "action": "Take a moment to simply observe your surroundings.",
+            "plant": get_plant_suggestion(emotion_data["emotion_group"])
         }

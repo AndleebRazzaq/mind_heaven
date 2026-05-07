@@ -193,14 +193,16 @@ class CBTMapping {
     }
 
     return CBTIntervention(
-      distortionDescription: explanation,
-      pattern: explanation,
-      insight: _acknowledgeEmotion(moodLabel),
-      reframe: safeReframe,
-      microInterventionTitle: safeExerciseTitle,
-      action: safeExerciseDesc,
+      distortionExplanation: explanation,
+      emotionalAcknowledgment: _acknowledgeEmotion(moodLabel),
+      interventionMode: mode,
+      cbtTechnique: technique,
+      reframeGuidance: safeReframe,
+      copingExerciseTitle: safeExerciseTitle,
+      copingExerciseDescription: safeExerciseDesc,
       plantSuggestion: PlantSuggestionDatabase.suggestionForEmotion(moodLabel),
       plantImageUrl: PlantSuggestionDatabase.imageUrlForEmotion(moodLabel),
+      plantReferenceUrl: PlantSuggestionDatabase.referenceUrlForEmotion(moodLabel),
       suggestBreathing: highStress,
       breathingTechnique: highStress
           ? '4-7-8 breathing: inhale 4s, hold 7s, exhale 8s. Repeat twice.'
@@ -212,6 +214,14 @@ class CBTMapping {
           ? null
           : _distortionLabel(distortionType),
       confidence: confidence,
+      responseValidation: _acknowledgeEmotion(moodLabel),
+      responsePatternAwareness: explanation,
+      cognitivePrompts: const [
+        'What evidence supports this thought?',
+        'What evidence challenges it?',
+        'Is there another possible explanation?',
+      ],
+      balancedReframeSuggestion: safeReframe,
     );
   }
 }
