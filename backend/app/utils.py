@@ -132,15 +132,16 @@ def predict_emotion(text):
         "confidence": conf_val
     }
 
-def get_plant_suggestion(emotion_group):
+def get_plant_suggestion(emotion_group, raw_label):
     mapping = {
-        "anxiety": "A Peace Lily may help create a calmer and clearer space.",
-        "stress": "A Jasmine plant can help soothe and refresh your environment.",
-        "low_mood": "An Aloe Vera plant may help bring a sense of healing and renewal.",
-        "positive": "A bright Sunflower can help maintain your positive energy.",
-        "neutral": "A Spider Plant is perfect for steady, grounded growth."
+        "anxiety": "Peace Lily nearby to help create a calmer and clearer space",
+        "stress": "Jasmine plant nearby to help soothe and refresh your environment",
+        "low_mood": "Aloe Vera plant nearby to help bring a sense of healing and renewal",
+        "positive": "bright Sunflower nearby to help maintain your positive energy",
+        "neutral": "Spider Plant nearby for steady, grounded growth"
     }
-    return mapping.get(emotion_group, "A Lucky Bamboo may help create a calmer and clearer space.")
+    plant_text = mapping.get(emotion_group, "Lucky Bamboo nearby for bring focus and clarity")
+    return f"Plant Suggestion: You seem to experience {raw_label}—consider keeping a {plant_text}."
 
 def predict_distortion(text):
     inputs = cbt_tokenizer(text, return_tensors="pt", truncation=True, padding=True).to(DEVICE)
@@ -173,14 +174,15 @@ def get_ai_response(text, emotion_data, distortion):
     Detected: Emotional State={final_label} ({intensity}%), Pattern={distortion}
     
     Task: Return JSON with these fields:
-    - "insight": EXACTLY one short, deeply empathic sentence acknowledging the {final_label} (e.g. "I hear that you're navigating some {final_label.lower()} right now, and it's completely understandable to feel this way.")
-    - "pattern_explanation": EXACTLY one to two short sentences explaining the {distortion} pattern simply.
-    - "reframe": A realistic, CBT-aligned balanced alternative thought.
+    - "insight": EXACTLY one short sentence explaining what the user may be experiencing emotionally. Must validate their feelings without sounding robotic. (e.g., "You seem mentally overwhelmed while trying to make the 'right' choice.")
+    - "pattern_explanation": EXACTLY one line explaining the {distortion} pattern (e.g. define the pattern strictly in one line).
+    - "reframe": A realistic, CBT-aligned balanced alternative thought in 3-4 lines.
     - "action": One small, concrete helpful step.
     
     Rules:
     - "insight" MUST be one line only.
-    - "pattern_explanation" MUST be 1-2 lines max.
+    - "pattern_explanation" MUST be exactly one line.
+    - "reframe" MUST be 3-4 lines long.
     - {stress_instruction}
     """
     
@@ -198,7 +200,7 @@ def get_ai_response(text, emotion_data, distortion):
         response.raise_for_status()
         ai_data = extract_json(response.json()["response"])
         # Inject the mapped plant suggestion
-        ai_data["plant"] = get_plant_suggestion(emotion_data["emotion_group"])
+        ai_data["plant"] = get_plant_suggestion(emotion_data["emotion_group"], emotion_data["raw_label"])
         return ai_data
     except Exception as e:
         print(f"[LLM ERROR] {str(e)}")
@@ -207,5 +209,5 @@ def get_ai_response(text, emotion_data, distortion):
             "pattern_explanation": f"It's common for our minds to use {distortion} when we feel under pressure.",
             "reframe": "Try to look at this from a balanced perspective, one small step at a time.",
             "action": "Take a moment to simply observe your surroundings.",
-            "plant": get_plant_suggestion(emotion_data["emotion_group"])
+            "plant": get_plant_suggestion(emotion_data["emotion_group"], emotion_data["raw_label"])
         }

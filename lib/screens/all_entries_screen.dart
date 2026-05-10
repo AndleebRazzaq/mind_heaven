@@ -68,11 +68,20 @@ class AllEntriesScreen extends StatelessWidget {
                 iconColor = const Color(0xFFB4C6FC);
               }
 
+              String displayTitle = 'Journal Entry';
+              if (entry.tags.contains('savoring')) {
+                displayTitle = 'Savoring';
+              } else if (entry.tags.contains('ai-journal')) {
+                displayTitle = 'AI Journal';
+              } else if (entry.tags.contains('check-in')) {
+                displayTitle = 'Check-in';
+              }
+
               return _CompletedEntryItem(
                 entry: entry,
                 icon: icon,
                 iconColor: iconColor,
-                title: entry.eventSummary ?? 'Journal Entry',
+                title: displayTitle,
                 subtitle: entry.content,
               );
             },
@@ -218,26 +227,25 @@ class _EntryDetailSheet extends StatelessWidget {
             const SizedBox(height: 24),
             Row(
               children: [
-                Icon(icon, color: iconColor, size: 28),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    title,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 22,
-                      fontWeight: FontWeight.w700,
-                    ),
+                Icon(icon, color: iconColor, size: 20),
+                const SizedBox(width: 8),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 4),
             Text(
               dateFormat.format(entry.dateTime),
               style: TextStyle(
-                color: Colors.grey.shade400,
-                fontSize: 14,
+                color: Colors.grey.shade500,
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
               ),
             ),
             const SizedBox(height: 24),

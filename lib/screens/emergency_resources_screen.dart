@@ -11,8 +11,6 @@ class EmergencyResourcesScreen extends StatelessWidget {
     );
     if (await canLaunchUrl(launchUri)) {
       await launchUrl(launchUri);
-    } else {
-      // Could not launch
     }
   }
 
@@ -26,8 +24,6 @@ class EmergencyResourcesScreen extends StatelessWidget {
     );
     if (await canLaunchUrl(launchUri)) {
       await launchUrl(launchUri);
-    } else {
-      // Could not launch
     }
   }
 
@@ -39,166 +35,210 @@ class EmergencyResourcesScreen extends StatelessWidget {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white54, size: 20),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
-          'Emergency Support',
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.w700,
+        actions: [
+          TextButton.icon(
+            onPressed: () {},
+            icon: const Icon(Icons.reply_rounded, color: Colors.white54, size: 20),
+            label: const Text(
+              'share',
+              style: TextStyle(
+                color: Colors.white54,
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
           ),
-        ),
+          const SizedBox(width: 8),
+        ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Icon(
-              Icons.warning_rounded,
-              color: Color(0xFFEF5350),
-              size: 48,
-            ),
-            const SizedBox(height: 16),
-            const Text(
-              "You are not alone.",
+            Text(
+              'Safety',
               style: TextStyle(
-                color: Colors.white,
-                fontSize: 28,
-                fontWeight: FontWeight.w800,
+                color: Colors.white.withValues(alpha: 0.6),
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
               ),
             ),
-            const SizedBox(height: 12),
-            Text(
-              "If you are feeling overwhelmed, having thoughts of self-harm, or experiencing a crisis, please reach out immediately. Help is available 24/7.",
+            const SizedBox(height: 8),
+            const Text(
+              'Emergency resources',
               style: TextStyle(
-                color: Colors.grey.shade400,
-                fontSize: 16,
+                color: Color(0xFFB4C6FC),
+                fontSize: 24,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              "If you are experiencing a mental health crisis, you are not alone. There are immediate and long-term actions you can take to keep yourself safe.",
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.8),
+                fontSize: 15,
                 height: 1.5,
               ),
             ),
-            const SizedBox(height: 32),
-            _buildResourceCard(
-              title: "National Suicide Prevention Lifeline",
-              description: "Free, confidential support for people in distress, prevention and crisis resources.",
-              contactInfo: "Call or text 988",
-              icon: Icons.phone_in_talk_rounded,
-              onTap: () => _makePhoneCall('988'),
-            ),
-            const SizedBox(height: 16),
-            _buildResourceCard(
-              title: "Crisis Text Line",
-              description: "Connect with a volunteer Crisis Counselor 24/7, free, confidential text message service.",
-              contactInfo: "Text HOME to 741741",
-              icon: Icons.message_rounded,
-              onTap: () => _sendSms('741741', 'HOME'),
-            ),
-            const SizedBox(height: 16),
-            _buildResourceCard(
-              title: "The Trevor Project",
-              description: "Crisis intervention and suicide prevention for LGBTQ youth.",
-              contactInfo: "Call 1-866-488-7386",
-              icon: Icons.support_agent_rounded,
-              onTap: () => _makePhoneCall('18664887386'),
-            ),
-            const SizedBox(height: 16),
-            _buildResourceCard(
-              title: "Veterans Crisis Line",
-              description: "Confidential crisis support for Veterans and their loved ones.",
-              contactInfo: "Call 988 and press 1",
-              icon: Icons.local_hospital_rounded,
-              onTap: () => _makePhoneCall('988'),
-            ),
             const SizedBox(height: 40),
-            Center(
-              child: Text(
-                "If this is an immediate medical emergency, please call 911 or go to the nearest emergency room.",
-                textAlign: TextAlign.center,
+            const Text(
+              'Immediate',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: 16),
+            const Divider(color: Colors.white10, height: 1),
+            Theme(
+              data: Theme.of(context).copyWith(
+                dividerColor: Colors.transparent,
+              ),
+              child: ExpansionTile(
+                tilePadding: const EdgeInsets.symmetric(vertical: 8),
+                title: const Text(
+                  'Connect with a crisis line',
+                  style: TextStyle(
+                    color: Color(0xFFB4C6FC),
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                iconColor: const Color(0xFFB4C6FC),
+                collapsedIconColor: const Color(0xFFB4C6FC),
+                children: [
+                  _buildActionCard(
+                    title: "National Suicide Prevention Lifeline",
+                    subtitle: "Call or text 988",
+                    onTap: () => _makePhoneCall('988'),
+                  ),
+                  _buildActionCard(
+                    title: "Crisis Text Line",
+                    subtitle: "Text HOME to 741741",
+                    onTap: () => _sendSms('741741', 'HOME'),
+                  ),
+                  _buildActionCard(
+                    title: "The Trevor Project",
+                    subtitle: "Call 1-866-488-7386",
+                    onTap: () => _makePhoneCall('18664887386'),
+                  ),
+                  const SizedBox(height: 16),
+                ],
+              ),
+            ),
+            const Divider(color: Colors.white10, height: 1),
+            Theme(
+              data: Theme.of(context).copyWith(
+                dividerColor: Colors.transparent,
+              ),
+              child: ExpansionTile(
+                tilePadding: const EdgeInsets.symmetric(vertical: 8),
+                title: const Text(
+                  'Go to the emergency room (ER)',
+                  style: TextStyle(
+                    color: Color(0xFFB4C6FC),
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                iconColor: const Color(0xFFB4C6FC),
+                collapsedIconColor: const Color(0xFFB4C6FC),
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: Text(
+                      "If you feel you cannot keep yourself safe, go to the nearest hospital emergency room. Let them know you are experiencing a mental health emergency.",
+                      style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 14, height: 1.4),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Divider(color: Colors.white10, height: 1),
+            Theme(
+              data: Theme.of(context).copyWith(
+                dividerColor: Colors.transparent,
+              ),
+              child: ExpansionTile(
+                tilePadding: const EdgeInsets.symmetric(vertical: 8),
+                title: const Text(
+                  'Call 911 or your local emergency number',
+                  style: TextStyle(
+                    color: Color(0xFFB4C6FC),
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                iconColor: const Color(0xFFB4C6FC),
+                collapsedIconColor: const Color(0xFFB4C6FC),
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: Text(
+                      "If you are in immediate medical danger or have already harmed yourself, call 911 or your local emergency number right away.",
+                      style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 14, height: 1.4),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Divider(color: Colors.white10, height: 1),
+            const SizedBox(height: 40),
+            const Text(
+              'Long-term',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: 16),
+            const Divider(color: Colors.white10, height: 1),
+            ListTile(
+              contentPadding: const EdgeInsets.symmetric(vertical: 8),
+              title: const Text(
+                'Find a therapist or psychiatrist',
                 style: TextStyle(
-                  color: Colors.grey.shade500,
-                  fontSize: 14,
+                  color: Color(0xFFB4C6FC),
+                  fontSize: 16,
                   fontWeight: FontWeight.w600,
                 ),
               ),
+              trailing: const Icon(Icons.arrow_forward_ios_rounded, color: Color(0xFFB4C6FC), size: 16),
+              onTap: () {},
             ),
-            const SizedBox(height: 32),
+            const Divider(color: Colors.white10, height: 1),
+            const SizedBox(height: 100), // spacing for bottom nav if present
           ],
         ),
       ),
     );
   }
 
-  Widget _buildResourceCard({
-    required String title,
-    required String description,
-    required String contactInfo,
-    required IconData icon,
-    required VoidCallback onTap,
-  }) {
+  Widget _buildActionCard({required String title, required String subtitle, required VoidCallback onTap}) {
     return Container(
+      margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
-        color: const Color(0xFFEF5350).withOpacity(0.1),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: const Color(0xFFEF5350).withOpacity(0.3),
-        ),
+        color: const Color(0xFF1E1E22),
+        borderRadius: BorderRadius.circular(12),
       ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(16),
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFEF5350).withOpacity(0.2),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(icon, color: const Color(0xFFEF5350), size: 28),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        description,
-                        style: TextStyle(
-                          color: Colors.grey.shade400,
-                          fontSize: 13,
-                          height: 1.4,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        contactInfo,
-                        style: const TextStyle(
-                          color: Color(0xFFEF5350),
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
+      child: ListTile(
+        onTap: onTap,
+        title: Text(
+          title,
+          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
         ),
+        subtitle: Text(
+          subtitle,
+          style: TextStyle(color: Colors.white.withValues(alpha: 0.6)),
+        ),
+        trailing: const Icon(Icons.call_made_rounded, color: Colors.white54, size: 20),
       ),
     );
   }

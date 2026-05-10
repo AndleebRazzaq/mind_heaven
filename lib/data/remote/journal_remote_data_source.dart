@@ -35,7 +35,7 @@ class JournalRemoteDataSource {
       showEmergency: data['show_emergency'] ?? false,
 
       // UPGRADED EMOTIONAL STATE FIELDS
-      emotionalState: emotion['final_label'] ?? emotion['label'] ?? 'Neutral',
+      emotionalState: emotion['raw_label'] ?? emotion['label'] ?? 'Neutral',
       emotionalStateSubtitle: ai['insight'] ?? '',
       intensityLabel: emotion['intensity_label'] ?? 'Moderate',
       emotionContext: emotion['context'] ?? 'general',

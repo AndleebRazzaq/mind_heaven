@@ -278,7 +278,8 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                     for (final entry
                         in (emotionPercentages.entries.toList()
                           ..sort((a, b) => b.value.compareTo(a.value))
-                          ..removeWhere((e) => e.value <= 0)))
+                          ..removeWhere((e) => e.value <= 0))
+                          .take(7))
                       Padding(
                         padding: const EdgeInsets.only(bottom: 16),
                         child: _EmotionProgressRow(

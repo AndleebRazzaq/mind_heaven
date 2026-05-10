@@ -139,7 +139,7 @@ class _ReframeOutputScreenState extends State<ReframeOutputScreen>
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'EMOTIONAL STATE',
+          'MOOD',
           style: TextStyle(
             color: const Color(0xFFB4C6FC).withValues(alpha: 0.7),
             fontSize: 11,
@@ -149,7 +149,7 @@ class _ReframeOutputScreenState extends State<ReframeOutputScreen>
         ),
         const SizedBox(height: 10),
         Text(
-          emotionalState,
+          emotionalState.toLowerCase(),
           style: const TextStyle(
             color: Colors.white,
             fontSize: 18,
@@ -237,14 +237,9 @@ class _ReframeOutputScreenState extends State<ReframeOutputScreen>
         ),
         const SizedBox(height: 10),
         Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.04),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: const Color(0xFFB4C6FC).withValues(alpha: 0.1),
-              width: 1,
-            ),
+          padding: const EdgeInsets.all(0),
+          decoration: const BoxDecoration(
+            color: Colors.transparent,
           ),
           child: Text(
             reframe,
@@ -423,26 +418,26 @@ class _ReframeOutputScreenState extends State<ReframeOutputScreen>
     final plant = widget.intervention.plantSuggestion;
 
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.03),
+        color: const Color(0xFF14161B),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: const Color(0xFF4ADE80).withValues(alpha: 0.2),
-          width: 1,
-        ),
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.eco, color: Color(0xFF4ADE80), size: 18),
+          const Padding(
+            padding: EdgeInsets.only(top: 2.0),
+            child: Icon(Icons.local_florist, color: Color(0xFF4ADE80), size: 20),
+          ),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
               plant.isNotEmpty
                   ? plant
-                  : '🌱 A plant can help you feel more grounded.',
-              style: const TextStyle(
-                color: Colors.white70,
+                  : 'Plant Suggestion: A plant can help you feel more grounded.',
+              style: TextStyle(
+                color: Colors.grey.shade300,
                 fontSize: 14,
                 height: 1.4,
               ),
@@ -522,7 +517,7 @@ class _ReframeOutputScreenState extends State<ReframeOutputScreen>
           onTap: () => Navigator.pop(context),
           child: const Center(
             child: Text(
-              'I feel more grounded',
+              'I feel more balanced',
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w800,

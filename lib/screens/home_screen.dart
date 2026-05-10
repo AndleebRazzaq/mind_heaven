@@ -64,27 +64,16 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           const SizedBox(height: 24),
 
-          _SectionTitle('Deep-dive journals'),
+          _SectionTitle('AI Support'),
           const SizedBox(height: 12),
           _DeepDiveCard(
-            title: 'Thought journal',
-            description: 'Overcome unhelpful patterns.',
-            icon: Icons.draw_outlined,
+            title: 'AI Journal',
+            description: 'Reframe thoughts with AI-powered CBT support.',
+            icon: Icons.auto_awesome,
             onTap: () => Navigator.push(
               context,
               MaterialPageRoute(builder: (_) => const JournalScreen()),
             ),
-          ),
-          const SizedBox(height: 12),
-          _DeepDiveCard(
-            title: 'Exposure journal',
-            description: 'Fight your fears by facing them.',
-            icon: Icons.person_pin_circle_outlined,
-            onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Exposure journal coming soon!')),
-              );
-            },
           ),
           const SizedBox(height: 24),
 
@@ -121,6 +110,14 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
               ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _ToolCard(
+                  title: 'Plant',
+                  icon: Icons.local_florist_rounded,
+                  onTap: () => _showPlantSuggestion(context),
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 24),
@@ -142,6 +139,177 @@ class _HomeScreenState extends State<HomeScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Breathing exercise completed!')),
     );
+  }
+
+  void _showPlantSuggestion(BuildContext context) {
+    final provider = context.read<JournalProvider>();
+    final lastEntry = provider.entries.isNotEmpty ? provider.entries.first : null;
+    
+    // Default to Spider Plant if no data
+    String plantType = 'spider plant';
+    String moodFound = 'neutral';
+    
+    if (lastEntry != null) {
+      final mood = (lastEntry.moodLabel ?? '').toLowerCase();
+      if (mood.contains('anxiety')) {
+        plantType = 'peace lily';
+        moodFound = 'anxiety';
+      } else if (mood.contains('stress')) {
+        plantType = 'jasmine plant';
+        moodFound = 'stress';
+      } else if (mood.contains('low') || mood.contains('sad')) {
+        plantType = 'aloe vera plant';
+        moodFound = 'low mood';
+      } else if (mood.contains('pos') || mood.contains('happy')) {
+        plantType = 'bright sunflower';
+        moodFound = 'positivity';
+      }
+    }
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (context) => _PlantSuggestionSheet(plantType: plantType, mood: moodFound),
+    );
+  }
+}
+
+class _PlantSuggestionSheet extends StatelessWidget {
+  final String plantType;
+  final String mood;
+
+  const _PlantSuggestionSheet({required this.plantType, required this.mood});
+
+  @override
+  Widget build(BuildContext context) {
+    final info = _getPlantInfo(plantType);
+    
+    return Container(
+      padding: const EdgeInsets.all(28),
+      decoration: const BoxDecoration(
+        color: Color(0xFF14161B),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Center(
+            child: Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(color: Colors.white10, borderRadius: BorderRadius.circular(2)),
+            ),
+          ),
+          const SizedBox(height: 24),
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF4ADE80).withOpacity(0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(info['icon'] as IconData, color: const Color(0xFF4ADE80), size: 28),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      info['name'] as String,
+                      style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w800),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Suggested for your $mood',
+                      style: TextStyle(color: Colors.grey.shade400, fontSize: 14),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+          const Text(
+            'Benefits & Awareness',
+            style: TextStyle(color: Color(0xFFB4C6FC), fontSize: 13, fontWeight: FontWeight.w700, letterSpacing: 1),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            info['benefits'] as String,
+            style: const TextStyle(color: Colors.white, fontSize: 15, height: 1.5),
+          ),
+          const SizedBox(height: 24),
+          const Text(
+            'How to Use',
+            style: TextStyle(color: Color(0xFFB4C6FC), fontSize: 13, fontWeight: FontWeight.w700, letterSpacing: 1),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            info['use'] as String,
+            style: const TextStyle(color: Colors.white, fontSize: 15, height: 1.5),
+          ),
+          const SizedBox(height: 32),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              style: ElevatedButton.fromStyle(
+                backgroundColor: const Color(0xFF4ADE80).withOpacity(0.2),
+                foregroundColor: const Color(0xFF4ADE80),
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Got it', style: TextStyle(fontWeight: FontWeight.w700)),
+            ),
+          ),
+          const SizedBox(height: 16),
+        ],
+      ),
+    );
+  }
+
+  Map<String, dynamic> _getPlantInfo(String type) {
+    switch (type) {
+      case 'peace lily':
+        return {
+          'name': 'Peace Lily',
+          'benefits': 'Purifies air and promotes a sense of calm. Its lush green leaves help reduce anxiety levels by creating a serene environment.',
+          'use': 'Keep in a shaded corner of your bedroom or office. It prefers indirect light.',
+          'icon': Icons.spa_rounded,
+        };
+      case 'jasmine plant':
+        return {
+          'name': 'Jasmine',
+          'benefits': 'The scent of Jasmine is known to reduce stress and improve sleep quality. It acts as a natural relaxant for the nervous system.',
+          'use': 'Place near a window where you can enjoy its fragrance, especially in the evening.',
+          'icon': Icons.local_florist,
+        };
+      case 'aloe vera plant':
+        return {
+          'name': 'Aloe Vera',
+          'benefits': 'Known as the "Plant of Immortality," it clears indoor toxins and emits oxygen at night, helping with renewal and healing.',
+          'use': 'Needs bright, indirect sunlight and minimal watering. Perfect for a bedside table.',
+          'icon': Icons.healing_rounded,
+        };
+      case 'bright sunflower':
+        return {
+          'name': 'Sunflower',
+          'benefits': 'Sunflowers symbolize positivity and happiness. Their bright yellow color can boost your mood and energy levels.',
+          'use': 'Best kept in sunny spots to maintain its vibrant energy and bring cheer to your room.',
+          'icon': Icons.wb_sunny_rounded,
+        };
+      default:
+        return {
+          'name': 'Spider Plant',
+          'benefits': 'One of the easiest plants to grow, it represents resilience and steady growth. It helps in maintaining a grounded perspective.',
+          'use': 'Great for hanging baskets or shelves in moderate light. It thrives with little maintenance.',
+          'icon': Icons.eco_rounded,
+        };
+    }
   }
 }
 
@@ -385,11 +553,20 @@ class _CompletedEntriesList extends StatelessWidget {
                   iconColor = const Color(0xFFB4C6FC);
                 }
 
+                String displayTitle = 'Journal Entry';
+                if (entry.tags.contains('savoring')) {
+                  displayTitle = 'Savoring';
+                } else if (entry.tags.contains('ai-journal')) {
+                  displayTitle = 'AI Journal';
+                } else if (entry.tags.contains('check-in')) {
+                  displayTitle = 'Check-in';
+                }
+
                 return _CompletedEntryItem(
                   entry: entry,
                   icon: icon,
                   iconColor: iconColor,
-                  title: entry.eventSummary ?? 'Journal Entry',
+                  title: displayTitle,
                   subtitle: entry.content,
                 );
               },
@@ -564,26 +741,25 @@ class _EntryDetailSheet extends StatelessWidget {
             const SizedBox(height: 24),
             Row(
               children: [
-                Icon(icon, color: iconColor, size: 28),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    title,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 22,
-                      fontWeight: FontWeight.w700,
-                    ),
+                Icon(icon, color: iconColor, size: 20),
+                const SizedBox(width: 8),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 4),
             Text(
               dateFormat.format(entry.dateTime),
               style: TextStyle(
-                color: Colors.grey.shade400,
-                fontSize: 14,
+                color: Colors.grey.shade500,
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
               ),
             ),
             const SizedBox(height: 24),

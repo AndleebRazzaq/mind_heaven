@@ -140,6 +140,17 @@ class JournalRepositoryImpl implements JournalRepository {
 
   @override
   Future<List<JournalEntry>> getEntries() async {
+    final user = await _authService.getCurrentUser();
+    if (user != null) {
+      try {
+        final cloudEntries = await _cloudService.getEntries(uid: user.uid);
+        // Optionally sync local storage with cloud entries here
+        return cloudEntries;
+      } catch (e) {
+        // Fallback to local if cloud fails (offline support)
+        return _storage.getJournalEntries();
+      }
+    }
     return _storage.getJournalEntries();
   }
 
