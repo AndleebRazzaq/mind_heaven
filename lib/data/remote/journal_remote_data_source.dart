@@ -32,6 +32,7 @@ class JournalRemoteDataSource {
       plantSuggestion: ai['plant'] ?? '',
       suggestBreathing: data['show_breathing'] ?? false,
       showBreathing: data['show_breathing'] ?? false,
+      showEmergency: data['show_emergency'] ?? false,
 
       // UPGRADED EMOTIONAL STATE FIELDS
       emotionalState: emotion['final_label'] ?? emotion['label'] ?? 'Neutral',

@@ -3,7 +3,6 @@ from pydantic import BaseModel
 from app.utils import (
     predict_emotion,
     predict_distortion,
-    map_intensity,
     get_ai_response
 )
 
@@ -34,20 +33,13 @@ def analyze(request: TextRequest):
             distortion["label"]
         )
 
-        # 3. Return upgraded structured JSON with emotional state
+        # 3. Return structured JSON
+        is_negative = emotion["emotion_group"] in ["stress", "low_mood", "anxiety"]
         return {
-            "emotion": {
-                "raw_label": emotion["label"],
-                "emotional_state": emotion["emotional_state"],
-                "emotional_state_subtitle": emotion["emotional_state_subtitle"],
-                "intensity": emotion["intensity"],
-                "intensity_label": emotion["intensity_label"],
-                "emotion_group": emotion["emotion_group"],
-                "context": emotion["context"],
-                "confidence": emotion["confidence"],
-            },
+            "emotion": emotion,
             "distortion": distortion,
-            "show_breathing": emotion["show_breathing"],
+            "show_breathing": emotion["emotion_group"] == "anxiety" and emotion["intensity"] >= 70,
+            "show_emergency": is_negative and emotion["intensity"] >= 90,
             "ai_response": ai_output
         }
     except Exception as e:

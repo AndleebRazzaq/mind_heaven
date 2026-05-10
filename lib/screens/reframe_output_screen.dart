@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../models/cbt_intervention.dart';
 import '../models/journal_entry.dart';
+import 'emergency_resources_screen.dart';
 
 class ReframeOutputScreen extends StatefulWidget {
   final CBTIntervention intervention;
@@ -102,6 +103,12 @@ class _ReframeOutputScreenState extends State<ReframeOutputScreen>
                 const SizedBox(height: 32),
               ],
 
+              // 🚨 5. EMERGENCY CARD (Conditional)
+              if (widget.intervention.showEmergency) ...[
+                _buildEmergencyCard(),
+                const SizedBox(height: 32),
+              ],
+
               // 🌱 5. PLANT SUGGESTION (Shorter + Softer)
               _buildPlantSection(),
               const SizedBox(height: 32),
@@ -145,7 +152,7 @@ class _ReframeOutputScreenState extends State<ReframeOutputScreen>
           emotionalState,
           style: const TextStyle(
             color: Colors.white,
-            fontSize: 28,
+            fontSize: 18,
             fontWeight: FontWeight.w700,
             height: 1.2,
           ),
@@ -154,8 +161,8 @@ class _ReframeOutputScreenState extends State<ReframeOutputScreen>
         Text(
           subtitle,
           style: TextStyle(
-            color: Colors.grey.shade300,
-            fontSize: 15,
+            color: Colors.grey.shade400,
+            fontSize: 14,
             height: 1.5,
           ),
         ),
@@ -341,6 +348,70 @@ class _ReframeOutputScreenState extends State<ReframeOutputScreen>
             ),
           );
         },
+      ),
+    );
+  }
+
+  // ============================================================================
+  // 🚨 EMERGENCY CARD (Dynamic, conditional)
+  // ============================================================================
+  Widget _buildEmergencyCard() {
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xFFEF5350).withOpacity(0.15),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: const Color(0xFFEF5350).withOpacity(0.4),
+          width: 1.5,
+        ),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12),
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const EmergencyResourcesScreen(),
+              ),
+            );
+          },
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    const Icon(Icons.warning_rounded, color: Color(0xFFEF5350), size: 24),
+                    const SizedBox(width: 10),
+                    const Expanded(
+                      child: Text(
+                        'Emergency Resources',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                    const Icon(Icons.arrow_forward_ios_rounded, color: Color(0xFFEF5350), size: 16),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'Your intensity level is very high right now. If you are feeling overwhelmed or having harmful thoughts, please reach out. Help is available.',
+                  style: TextStyle(
+                    color: Colors.grey.shade300,
+                    fontSize: 13,
+                    height: 1.4,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

@@ -173,12 +173,15 @@ def get_ai_response(text, emotion_data, distortion):
     Detected: Emotional State={final_label} ({intensity}%), Pattern={distortion}
     
     Task: Return JSON with these fields:
-    - "insight": A warm, human subtitle explaining the {final_label} (e.g. "You seem mentally overwhelmed while trying to...")
-    - "pattern_explanation": A simple, empathetic explanation of why this pattern is happening.
-    - "reframe": A realistic, CBT-aligned balanced alternative thought (avoid toxic positivity).
+    - "insight": EXACTLY one short, deeply empathic sentence acknowledging the {final_label} (e.g. "I hear that you're navigating some {final_label.lower()} right now, and it's completely understandable to feel this way.")
+    - "pattern_explanation": EXACTLY one to two short sentences explaining the {distortion} pattern simply.
+    - "reframe": A realistic, CBT-aligned balanced alternative thought.
     - "action": One small, concrete helpful step.
     
-    {stress_instruction}
+    Rules:
+    - "insight" MUST be one line only.
+    - "pattern_explanation" MUST be 1-2 lines max.
+    - {stress_instruction}
     """
     
     try:

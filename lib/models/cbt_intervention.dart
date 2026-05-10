@@ -32,6 +32,7 @@ class CBTIntervention {
   final String? intensityLabel; // Low, Moderate, High, Very High
   final String? emotionContext; // social, performance, health, general
   final bool showBreathing; // Show breathing card if true
+  final bool showEmergency; // Show emergency card if true
 
   /// Numeric class id from the distortion classifier when using the remote API.
   final int? distortionLabelId;
@@ -124,5 +125,6 @@ class CBTIntervention {
     this.intensityLabel,
     this.emotionContext,
     this.showBreathing = false,
+    this.showEmergency = false,
   });
 }

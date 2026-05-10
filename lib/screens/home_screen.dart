@@ -9,6 +9,7 @@ import 'check_in_screen.dart';
 import 'savoring_screen.dart';
 import '../models/journal_entry.dart';
 import '../routes/app_routes.dart';
+import 'emergency_resources_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -114,15 +115,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: _ToolCard(
                   title: 'Emergency',
                   icon: Icons.support,
-                  onTap: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text(
-                          'Emergency contacts: 988 (US) | Local hotline',
-                        ),
-                      ),
-                    );
-                  },
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const EmergencyResourcesScreen()),
+                  ),
                 ),
               ),
             ],
