@@ -1,4 +1,3 @@
-import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -106,7 +105,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   icon: Icons.support,
                   onTap: () => Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (_) => const EmergencyResourcesScreen()),
+                    MaterialPageRoute(
+                      builder: (_) => const EmergencyResourcesScreen(),
+                    ),
                   ),
                 ),
               ),
@@ -143,12 +144,14 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _showPlantSuggestion(BuildContext context) {
     final provider = context.read<JournalProvider>();
-    final lastEntry = provider.entries.isNotEmpty ? provider.entries.first : null;
-    
+    final lastEntry = provider.entries.isNotEmpty
+        ? provider.entries.first
+        : null;
+
     // Default to Spider Plant if no data
     String plantType = 'spider plant';
     String moodFound = 'neutral';
-    
+
     if (lastEntry != null) {
       final mood = (lastEntry.moodLabel ?? '').toLowerCase();
       if (mood.contains('anxiety')) {
@@ -170,7 +173,8 @@ class _HomeScreenState extends State<HomeScreen> {
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
-      builder: (context) => _PlantSuggestionSheet(plantType: plantType, mood: moodFound),
+      builder: (context) =>
+          _PlantSuggestionSheet(plantType: plantType, mood: moodFound),
     );
   }
 }
@@ -184,7 +188,7 @@ class _PlantSuggestionSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final info = _getPlantInfo(plantType);
-    
+
     return Container(
       padding: const EdgeInsets.all(28),
       decoration: const BoxDecoration(
@@ -199,7 +203,10 @@ class _PlantSuggestionSheet extends StatelessWidget {
             child: Container(
               width: 40,
               height: 4,
-              decoration: BoxDecoration(color: Colors.white10, borderRadius: BorderRadius.circular(2)),
+              decoration: BoxDecoration(
+                color: Colors.white10,
+                borderRadius: BorderRadius.circular(2),
+              ),
             ),
           ),
           const SizedBox(height: 24),
@@ -208,10 +215,14 @@ class _PlantSuggestionSheet extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF4ADE80).withOpacity(0.1),
+                  color: const Color(0xFF4ADE80).withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(info['icon'] as IconData, color: const Color(0xFF4ADE80), size: 28),
+                child: Icon(
+                  info['icon'] as IconData,
+                  color: const Color(0xFF4ADE80),
+                  size: 28,
+                ),
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -220,12 +231,19 @@ class _PlantSuggestionSheet extends StatelessWidget {
                   children: [
                     Text(
                       info['name'] as String,
-                      style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w800),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 22,
+                        fontWeight: FontWeight.w800,
+                      ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       'Suggested for your $mood',
-                      style: TextStyle(color: Colors.grey.shade400, fontSize: 14),
+                      style: TextStyle(
+                        color: Colors.grey.shade400,
+                        fontSize: 14,
+                      ),
                     ),
                   ],
                 ),
@@ -235,35 +253,58 @@ class _PlantSuggestionSheet extends StatelessWidget {
           const SizedBox(height: 24),
           const Text(
             'Benefits & Awareness',
-            style: TextStyle(color: Color(0xFFB4C6FC), fontSize: 13, fontWeight: FontWeight.w700, letterSpacing: 1),
+            style: TextStyle(
+              color: Color(0xFFB4C6FC),
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 1,
+            ),
           ),
           const SizedBox(height: 12),
           Text(
             info['benefits'] as String,
-            style: const TextStyle(color: Colors.white, fontSize: 15, height: 1.5),
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 15,
+              height: 1.5,
+            ),
           ),
           const SizedBox(height: 24),
           const Text(
             'How to Use',
-            style: TextStyle(color: Color(0xFFB4C6FC), fontSize: 13, fontWeight: FontWeight.w700, letterSpacing: 1),
+            style: TextStyle(
+              color: Color(0xFFB4C6FC),
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 1,
+            ),
           ),
           const SizedBox(height: 12),
           Text(
             info['use'] as String,
-            style: const TextStyle(color: Colors.white, fontSize: 15, height: 1.5),
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 15,
+              height: 1.5,
+            ),
           ),
           const SizedBox(height: 32),
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              style: ElevatedButton.fromStyle(
-                backgroundColor: const Color(0xFF4ADE80).withOpacity(0.2),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF4ADE80).withValues(alpha: 0.2),
                 foregroundColor: const Color(0xFF4ADE80),
                 padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
               onPressed: () => Navigator.pop(context),
-              child: const Text('Got it', style: TextStyle(fontWeight: FontWeight.w700)),
+              child: const Text(
+                'Got it',
+                style: TextStyle(fontWeight: FontWeight.w700),
+              ),
             ),
           ),
           const SizedBox(height: 16),
@@ -277,36 +318,46 @@ class _PlantSuggestionSheet extends StatelessWidget {
       case 'peace lily':
         return {
           'name': 'Peace Lily',
-          'benefits': 'Purifies air and promotes a sense of calm. Its lush green leaves help reduce anxiety levels by creating a serene environment.',
-          'use': 'Keep in a shaded corner of your bedroom or office. It prefers indirect light.',
+          'benefits':
+              'Purifies air and promotes a sense of calm. Its lush green leaves help reduce anxiety levels by creating a serene environment.',
+          'use':
+              'Keep in a shaded corner of your bedroom or office. It prefers indirect light.',
           'icon': Icons.spa_rounded,
         };
       case 'jasmine plant':
         return {
           'name': 'Jasmine',
-          'benefits': 'The scent of Jasmine is known to reduce stress and improve sleep quality. It acts as a natural relaxant for the nervous system.',
-          'use': 'Place near a window where you can enjoy its fragrance, especially in the evening.',
+          'benefits':
+              'The scent of Jasmine is known to reduce stress and improve sleep quality. It acts as a natural relaxant for the nervous system.',
+          'use':
+              'Place near a window where you can enjoy its fragrance, especially in the evening.',
           'icon': Icons.local_florist,
         };
       case 'aloe vera plant':
         return {
           'name': 'Aloe Vera',
-          'benefits': 'Known as the "Plant of Immortality," it clears indoor toxins and emits oxygen at night, helping with renewal and healing.',
-          'use': 'Needs bright, indirect sunlight and minimal watering. Perfect for a bedside table.',
+          'benefits':
+              'Known as the "Plant of Immortality," it clears indoor toxins and emits oxygen at night, helping with renewal and healing.',
+          'use':
+              'Needs bright, indirect sunlight and minimal watering. Perfect for a bedside table.',
           'icon': Icons.healing_rounded,
         };
       case 'bright sunflower':
         return {
           'name': 'Sunflower',
-          'benefits': 'Sunflowers symbolize positivity and happiness. Their bright yellow color can boost your mood and energy levels.',
-          'use': 'Best kept in sunny spots to maintain its vibrant energy and bring cheer to your room.',
+          'benefits':
+              'Sunflowers symbolize positivity and happiness. Their bright yellow color can boost your mood and energy levels.',
+          'use':
+              'Best kept in sunny spots to maintain its vibrant energy and bring cheer to your room.',
           'icon': Icons.wb_sunny_rounded,
         };
       default:
         return {
           'name': 'Spider Plant',
-          'benefits': 'One of the easiest plants to grow, it represents resilience and steady growth. It helps in maintaining a grounded perspective.',
-          'use': 'Great for hanging baskets or shelves in moderate light. It thrives with little maintenance.',
+          'benefits':
+              'One of the easiest plants to grow, it represents resilience and steady growth. It helps in maintaining a grounded perspective.',
+          'use':
+              'Great for hanging baskets or shelves in moderate light. It thrives with little maintenance.',
           'icon': Icons.eco_rounded,
         };
     }
@@ -576,11 +627,16 @@ class _CompletedEntriesList extends StatelessWidget {
               GestureDetector(
                 onTap: () => Navigator.pushNamed(context, AppRoutes.allEntries),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 8,
+                    horizontal: 16,
+                  ),
                   decoration: BoxDecoration(
                     color: const Color(0xFF8A6BFF).withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: const Color(0xFF8A6BFF).withValues(alpha: 0.2)),
+                    border: Border.all(
+                      color: const Color(0xFF8A6BFF).withValues(alpha: 0.2),
+                    ),
                   ),
                   child: const Row(
                     mainAxisSize: MainAxisSize.min,
@@ -594,7 +650,11 @@ class _CompletedEntriesList extends StatelessWidget {
                         ),
                       ),
                       SizedBox(width: 4),
-                      Icon(Icons.arrow_forward_ios_rounded, color: Color(0xFF8A6BFF), size: 12),
+                      Icon(
+                        Icons.arrow_forward_ios_rounded,
+                        color: Color(0xFF8A6BFF),
+                        size: 12,
+                      ),
                     ],
                   ),
                 ),
@@ -647,50 +707,55 @@ class _CompletedEntryItem extends StatelessWidget {
             fontSize: 15,
             fontWeight: FontWeight.w600,
           ),
-      ),
-      subtitle: Padding(
-        padding: const EdgeInsets.only(top: 4.0),
-        child: Text(
-          subtitle,
-          style: TextStyle(
-            color: Colors.grey.shade400,
-            fontSize: 13,
-            height: 1.4,
-          ),
-          maxLines: 5,
-          overflow: TextOverflow.ellipsis,
         ),
-      ),
-      trailing: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          Text(
-            '${entry.dateTime.day}/${entry.dateTime.month}',
+        subtitle: Padding(
+          padding: const EdgeInsets.only(top: 4.0),
+          child: Text(
+            subtitle,
             style: TextStyle(
-              color: Colors.grey.shade500,
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
+              color: Colors.grey.shade400,
+              fontSize: 13,
+              height: 1.4,
             ),
+            maxLines: 5,
+            overflow: TextOverflow.ellipsis,
           ),
-          const SizedBox(height: 4),
-          Icon(Icons.chevron_right_rounded, color: Colors.grey.shade700, size: 16),
-        ],
+        ),
+        trailing: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Text(
+              '${entry.dateTime.day}/${entry.dateTime.month}',
+              style: TextStyle(
+                color: Colors.grey.shade500,
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Icon(
+              Icons.chevron_right_rounded,
+              color: Colors.grey.shade700,
+              size: 16,
+            ),
+          ],
+        ),
+        onTap: () {
+          showModalBottomSheet(
+            context: context,
+            isScrollControlled: true,
+            backgroundColor: Colors.transparent,
+            builder: (context) => _EntryDetailSheet(
+              entry: entry,
+              title: title,
+              icon: icon,
+              iconColor: iconColor,
+            ),
+          );
+        },
       ),
-      onTap: () {
-        showModalBottomSheet(
-          context: context,
-          isScrollControlled: true,
-          backgroundColor: Colors.transparent,
-          builder: (context) => _EntryDetailSheet(
-            entry: entry,
-            title: title,
-            icon: icon,
-            iconColor: iconColor,
-          ),
-        );
-      },
-    ));
+    );
   }
 }
 
@@ -769,42 +834,71 @@ class _EntryDetailSheet extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     if (isAiJournal || isCheckIn) ...[
-                      if (entry.moodLabel != null && entry.moodLabel!.isNotEmpty) ...[
-                        _DetailSectionTitle('Mood', color: const Color(0xFFB4C6FC)),
+                      if (entry.moodLabel != null &&
+                          entry.moodLabel!.isNotEmpty) ...[
+                        _DetailSectionTitle(
+                          'Mood',
+                          color: const Color(0xFFB4C6FC),
+                        ),
                         const SizedBox(height: 8),
                         Text(
                           entry.moodLabel!,
-                          style: const TextStyle(color: Colors.white, fontSize: 16),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                          ),
                         ),
                         const SizedBox(height: 16),
                       ],
                     ],
                     if (isAiJournal) ...[
-                      if (entry.detectedDistortionLabel != null && entry.detectedDistortionLabel!.isNotEmpty) ...[
-                        _DetailSectionTitle('Pattern', color: const Color(0xFF8A6BFF)),
+                      if (entry.detectedDistortionLabel != null &&
+                          entry.detectedDistortionLabel!.isNotEmpty) ...[
+                        _DetailSectionTitle(
+                          'Pattern',
+                          color: const Color(0xFF8A6BFF),
+                        ),
                         const SizedBox(height: 8),
                         Text(
                           entry.detectedDistortionLabel!,
-                          style: const TextStyle(color: Colors.white, fontSize: 16),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                          ),
                         ),
                         const SizedBox(height: 16),
                       ],
-                      if (entry.reframe != null && entry.reframe!.isNotEmpty) ...[
-                        _DetailSectionTitle('Reframe', color: const Color(0xFF8A6BFF)),
+                      if (entry.reframe != null &&
+                          entry.reframe!.isNotEmpty) ...[
+                        _DetailSectionTitle(
+                          'Reframe',
+                          color: const Color(0xFF8A6BFF),
+                        ),
                         const SizedBox(height: 8),
                         Text(
                           entry.reframe!,
-                          style: const TextStyle(color: Colors.white, fontSize: 16, height: 1.5),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            height: 1.5,
+                          ),
                         ),
                         const SizedBox(height: 16),
                       ],
                     ],
                     if (isSavoring && entry.eventSummary != null) ...[
-                        _DetailSectionTitle('Contextual factor', color: const Color(0xFFE4A4C1)),
+                      _DetailSectionTitle(
+                        'Contextual factor',
+                        color: const Color(0xFFE4A4C1),
+                      ),
                       const SizedBox(height: 8),
                       Text(
                         entry.eventSummary!,
-                        style: const TextStyle(color: Colors.white, fontSize: 16, height: 1.5),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          height: 1.5,
+                        ),
                       ),
                       const SizedBox(height: 16),
                     ],
@@ -839,11 +933,7 @@ class _DetailSectionTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       title,
-      style: TextStyle(
-        color: color,
-        fontSize: 14,
-        fontWeight: FontWeight.w600,
-      ),
+      style: TextStyle(color: color, fontSize: 14, fontWeight: FontWeight.w600),
     );
   }
 }
@@ -878,13 +968,15 @@ class _HomeCalendarHeaderState extends State<_HomeCalendarHeader> {
 
   void _scrollToToday() {
     if (!_scrollController.hasClients) return;
-    int todayIndex = _weekDays.indexWhere((d) => d.day == _today.day && d.month == _today.month);
+    int todayIndex = _weekDays.indexWhere(
+      (d) => d.day == _today.day && d.month == _today.month,
+    );
     if (todayIndex == -1) return;
-    
+
     final double screenWidth = MediaQuery.of(context).size.width;
     double offset = (todayIndex * 64.0) - (screenWidth / 2) + 32;
     if (offset < 0) offset = 0;
-    
+
     _scrollController.animateTo(
       offset,
       duration: const Duration(milliseconds: 300),
@@ -934,10 +1026,13 @@ class _HomeCalendarHeaderState extends State<_HomeCalendarHeader> {
           scrollDirection: Axis.horizontal,
           child: Row(
             children: _weekDays.map((date) {
-              bool isToday = date.day == _today.day && date.month == _today.month && date.year == _today.year;
+              bool isToday =
+                  date.day == _today.day &&
+                  date.month == _today.month &&
+                  date.year == _today.year;
               return _buildDayBox(
-                context, 
-                dayFormat.format(date), 
+                context,
+                dayFormat.format(date),
                 isSelected: isToday,
               );
             }).toList(),

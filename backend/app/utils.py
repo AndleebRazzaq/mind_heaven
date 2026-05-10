@@ -53,7 +53,7 @@ OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3.2:1b")
 
 SYSTEM_PROMPT = """
 You are a calm, supportive CBT-based journaling assistant.
-Your goal is to help the user feel understood, identify the thinking pattern, gently reframe and suggest a small helpful action, and one indoor plant accordingto mood.
+Your goal is to help the user feel understood, identify the thinking pattern, gently reframe and suggest a small helpful action, and one indoor plant according to mood.
 
 Rules:
 - Be non-judgmental and empathetic
@@ -140,7 +140,7 @@ def get_plant_suggestion(emotion_group, raw_label):
         "positive": "bright Sunflower nearby to help maintain your positive energy",
         "neutral": "Spider Plant nearby for steady, grounded growth"
     }
-    plant_text = mapping.get(emotion_group, "Lucky Bamboo nearby for bring focus and clarity")
+    plant_text = mapping.get(emotion_group, "Lucky Bamboo nearby to bring focus and clarity")
     return f"Plant Suggestion: You seem to experience {raw_label}—consider keeping a {plant_text}."
 
 def predict_distortion(text):

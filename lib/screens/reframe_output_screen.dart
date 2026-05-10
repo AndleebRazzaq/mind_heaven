@@ -149,7 +149,7 @@ class _ReframeOutputScreenState extends State<ReframeOutputScreen>
         ),
         const SizedBox(height: 10),
         Text(
-          emotionalState.toLowerCase(),
+          emotionalState,
           style: const TextStyle(
             color: Colors.white,
             fontSize: 18,
@@ -238,9 +238,7 @@ class _ReframeOutputScreenState extends State<ReframeOutputScreen>
         const SizedBox(height: 10),
         Container(
           padding: const EdgeInsets.all(0),
-          decoration: const BoxDecoration(
-            color: Colors.transparent,
-          ),
+          decoration: const BoxDecoration(color: Colors.transparent),
           child: Text(
             reframe,
             style: const TextStyle(
@@ -353,10 +351,10 @@ class _ReframeOutputScreenState extends State<ReframeOutputScreen>
   Widget _buildEmergencyCard() {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFFEF5350).withOpacity(0.15),
+        color: const Color(0xFFEF5350).withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: const Color(0xFFEF5350).withOpacity(0.4),
+          color: const Color(0xFFEF5350).withValues(alpha: 0.4),
           width: 1.5,
         ),
       ),
@@ -379,7 +377,11 @@ class _ReframeOutputScreenState extends State<ReframeOutputScreen>
               children: [
                 Row(
                   children: [
-                    const Icon(Icons.warning_rounded, color: Color(0xFFEF5350), size: 24),
+                    const Icon(
+                      Icons.warning_rounded,
+                      color: Color(0xFFEF5350),
+                      size: 24,
+                    ),
                     const SizedBox(width: 10),
                     const Expanded(
                       child: Text(
@@ -391,7 +393,11 @@ class _ReframeOutputScreenState extends State<ReframeOutputScreen>
                         ),
                       ),
                     ),
-                    const Icon(Icons.arrow_forward_ios_rounded, color: Color(0xFFEF5350), size: 16),
+                    const Icon(
+                      Icons.arrow_forward_ios_rounded,
+                      color: Color(0xFFEF5350),
+                      size: 16,
+                    ),
                   ],
                 ),
                 const SizedBox(height: 12),
@@ -428,7 +434,11 @@ class _ReframeOutputScreenState extends State<ReframeOutputScreen>
         children: [
           const Padding(
             padding: EdgeInsets.only(top: 2.0),
-            child: Icon(Icons.local_florist, color: Color(0xFF4ADE80), size: 20),
+            child: Icon(
+              Icons.local_florist,
+              color: Color(0xFF4ADE80),
+              size: 20,
+            ),
           ),
           const SizedBox(width: 12),
           Expanded(

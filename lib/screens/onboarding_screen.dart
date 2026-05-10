@@ -143,34 +143,45 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   Widget _buildPage(_OnboardingPage page) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Image.asset(page.imagePath, height: 320, fit: BoxFit.contain),
-          const SizedBox(height: 48),
-          Text(
-            page.title,
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final imageHeight = (constraints.maxHeight * 0.52).clamp(180.0, 320.0);
+        final contentGap = constraints.maxHeight < 480 ? 24.0 : 48.0;
+
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Image.asset(
+                page.imagePath,
+                height: imageHeight,
+                fit: BoxFit.contain,
+              ),
+              SizedBox(height: contentGap),
+              Text(
+                page.title,
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                   color: Colors.white,
                   fontWeight: FontWeight.w900,
                   fontSize: 28,
                 ),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            page.subtitle,
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              ),
+              const SizedBox(height: 16),
+              Text(
+                page.subtitle,
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   color: Colors.grey.shade400,
                   height: 1.4,
                   fontSize: 16,
                 ),
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }

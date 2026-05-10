@@ -35,13 +35,21 @@ class JournalRemoteDataSource {
       showEmergency: data['show_emergency'] ?? false,
 
       // UPGRADED EMOTIONAL STATE FIELDS
-      emotionalState: emotion['raw_label'] ?? emotion['label'] ?? 'Neutral',
+      emotionalState:
+          emotion['final_label'] ??
+          emotion['label'] ??
+          emotion['raw_label'] ??
+          'Neutral',
       emotionalStateSubtitle: ai['insight'] ?? '',
       intensityLabel: emotion['intensity_label'] ?? 'Moderate',
       emotionContext: emotion['context'] ?? 'general',
 
       // Legacy fields
-      moodLabel: emotion['final_label'] ?? emotion['label'] ?? 'Neutral',
+      moodLabel:
+          emotion['final_label'] ??
+          emotion['label'] ??
+          emotion['raw_label'] ??
+          'Neutral',
       emotionConfidence: (emotion['confidence'] as num?)?.toDouble() ?? 0.0,
       emotionIntensity: (emotion['intensity'] as num?)?.toDouble() ?? 0.0,
       detectedDistortionLabel: distortion['label'] ?? 'none',
