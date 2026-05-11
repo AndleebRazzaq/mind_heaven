@@ -1,145 +1,119 @@
 # FastAPI — Integration, Models, and Deployment
 
-## 1. Backend layout
+## 1. Backend Layout
 
 ```text
 backend/
   app/
-    main.py
-    schemas.py
-    config.py
+    main.py           # API entrypoint (Port 8001)
+    schemas.py        # Pydantic models
+    utils.py          # AI utility functions & Ollama pipeline
     services/
-      distortion_service.py    # Your trained model (Transformers folder)
-      emotion_service.py       # Hugging Face pretrained pipeline
-      cbt_engine.py
-      plant_database.py
+      distortion_service.py      # Fine-tuned DistilBERT
+      emotion_service.py         # GoEmotions model
+      emotional_state_mapper.py   # Label → Human-readable state
+      context_detector.py        # Context analysis
+      reframe_pipeline.py        # LLM orchestration
   requirements.txt
-  Dockerfile
 ```
 
 ---
 
-## 2. Distortion classifier (your trained model)
+## 2. LLM Integration (Ollama)
 
-**Expected format:** A directory loadable by `AutoModelForSequenceClassification.from_pretrained(dir)`:
+The backend uses **Ollama** for generative CBT reframing.
 
-- `config.json`, tokenizer files, weights (`model.safetensors` or `pytorch_model.bin`).
+### Setup
+1.  Install [Ollama](https://ollama.com/).
+2.  Pull the required model: `ollama pull llama3.2:1b`.
+3.  Ensure the Ollama server is running (usually at `http://localhost:11434`).
 
-**Numeric labels:** Inference uses **argmax** over logits and **softmax** for **confidence**. The integer id is returned as `distortion_label_id` in the API.
-
-**Human-readable name:** From (in order):
-
-1. `DISTORTION_LABEL_MAP_PATH` JSON, or  
-2. `<model_dir>/distortion_label_map.json`, or  
-3. `id2label` inside the model `config.json`.
-
-Recommended map location: `<model_dir>/distortion_label_map.json`.
-
-**Environment:**
-
-```bash
-set DISTORTION_MODEL_DIR=D:\path\to\your\export
-set DISTORTION_LABEL_MAP_PATH=D:\optional\override\map.json
-set DISTORTION_USE_MOCK=1
-```
-
-`DISTORTION_USE_MOCK=1` skips loading and uses heuristics (useful on laptops without weights).
+### Environment Variables
+- `OLLAMA_URL`: URL for the Ollama API (Default: `http://localhost:11434/api/generate`).
+- `OLLAMA_MODEL`: The model name to use (Default: `llama3.2:1b`).
 
 ---
 
-## 3. Emotion classifier (Hugging Face)
+## 3. Classification Models
 
-**Default model:** `j-hartmann/emotion-english-distilroberta-base`
+### Distortion Classifier
+- **Model:** Fine-tuned DistilBERT.
+- **Location:** `backend/models/cbt_distortion_model_impr`.
+- **Loading:** Uses `AutoModelForSequenceClassification` from Transformers.
 
-**Override:**
-
-```bash
-set EMOTION_HF_MODEL=SamLowe/roberta-base-go_emotions
-set EMOTION_USE_MOCK=1
-```
-
-First request may download weights (ensure disk and network). For containers, set `HF_HOME` to a cached volume if desired.
+### Emotion Classifier
+- **Model:** Pretrained GoEmotions DistilRoBERTa.
+- **Location:** `backend/models/emotion_goemotions_model`.
 
 ---
 
-## 4. API contract
+## 4. API Contract
 
-**`POST /analyze/journal`**
+### **`POST /analyze`**
 
-Request:
-
+**Request:**
 ```json
-{ "text": "I always fail and this will be a disaster." }
+{
+  "text": "I feel so nervous about my presentation tomorrow, I'm sure I'll fail."
+}
 ```
 
-Response (subset): `distortion_explanation`, `mood_label`, `emotion_confidence`, `detected_distortion_label`, `confidence`, **`distortion_label_id`**, `stress_level`, `plant_suggestion`, …
-
-Maps to Flutter `CBTIntervention` in `lib/data/remote/journal_remote_data_source.dart`.
-
----
-
-## 5. Run locally
-
-```bash
-cd backend
-python -m venv .venv
-.venv\Scripts\activate
-pip install torch
-pip install -r requirements.txt
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
-```
-
-On Linux/Docker, prefer CPU wheels:
-
-```bash
-pip install torch --index-url https://download.pytorch.org/whl/cpu
-pip install -r requirements.txt
-```
-
-The `Dockerfile` installs CPU `torch` before the rest of `requirements.txt`.
-
----
-
-## 6. Flutter wiring
-
-- Base URL: `lib/core/config/app_config.dart` (`API_BASE_URL` via `--dart-define`)
-- Client: `lib/core/network/api_client.dart`
-- Remote journal: `lib/data/remote/journal_remote_data_source.dart`
-- Toggle: `lib/main.dart` → `useRemote: true` for API mode
-
-**Device URLs:**
-
-- Android emulator → host: `http://10.0.2.2:8000`
-- iOS simulator: `http://localhost:8000`
-- Physical device: `http://<PC_LAN_IP>:8000`
-
----
-
-## 7. Docker
-
-```bash
-cd backend
-docker build -t mind-heaven-api .
-docker run -p 8000:8000 ^
-  -e DISTORTION_MODEL_DIR=/models/distortion ^
-  -v D:\your\models:/models ^
-  mind-heaven-api
-```
-
-Mount your model directory and set `DISTORTION_MODEL_DIR` inside the container.
-
----
-
-## 8. Cloud deploy
-
-Render / Railway / Fly.io / Azure / AWS: build from `backend/Dockerfile`, set env vars, then:
-
-```bash
-flutter build apk --release --dart-define=API_BASE_URL=https://your-api-host
+**Response:**
+```json
+{
+  "emotion": {
+    "raw_label": "nervousness",
+    "emotion_group": "anxiety",
+    "context": "performance",
+    "intensity": 85,
+    "intensity_label": "Very High",
+    "final_label": "Performance Stress",
+    "confidence": 0.8542
+  },
+  "distortion": {
+    "label": "fortune-telling",
+    "confidence": 0.7231
+  },
+  "show_breathing": true,
+  "show_emergency": false,
+  "ai_response": {
+    "insight": "You seem concerned about meeting expectations or doing well.",
+    "pattern_explanation": "Fortune-telling involves predicting a negative outcome without considering more likely possibilities.",
+    "reframe": "While it's natural to feel nervous, your past successes show you are capable. One presentation doesn't define your entire worth.",
+    "action": "Try practicing your presentation once more in a comfortable environment.",
+    "plant": "Plant Suggestion: You seem to experience nervousness—consider keeping a Peace Lily nearby."
+  }
+}
 ```
 
 ---
 
-## 9. Implementation details
+## 5. Local Execution
 
-See **`docs/IMPLEMENTATION_GUIDE.md`** for label-map editing, plant DB alignment, and evaluation notes.
+1.  **Activate Virtual Env:**
+    ```bash
+    cd backend
+    .venv\Scripts\activate
+    ```
+2.  **Run with Uvicorn:**
+    ```bash
+    uvicorn app.main:app --reload --host 0.0.0.0 --port 8001
+    ```
+
+---
+
+## 6. Flutter Integration
+
+- **Endpoint:** `http://<HOST>:8001/analyze`
+- **Android Emulator:** Use `http://10.0.2.2:8001/analyze`.
+- **Configuration:** Managed in `lib/core/config/app_config.dart`.
+- **Toggle:** Set `useRemote: true` in `JournalRepositoryImpl` (usually in `bootstrap.dart`).
+
+---
+
+## 7. Troubleshooting
+
+- **Ollama Error:** Ensure the Ollama service is running and the model is pulled.
+- **Connection Refused:** Check the port (8001) and host IP.
+- **CORS Issues:** The backend includes CORSMiddleware; ensure the request origin is allowed if testing from web.
+- **Model Paths:** Verify the `models/` directory exists inside `backend/` and contains the required weight folders.

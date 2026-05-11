@@ -5,30 +5,30 @@
 Mind Heaven is a **CBT-based, journal-first** mental wellness app that:
 
 - Detects **cognitive distortions** and **emotional tone** from **journal text**
-- Applies a **rule-based CBT mapping** (confidence-aware safety modes)
-- Delivers a structured intervention card (explanation, reframe, exercise, optional breathing, **plant suggestion**)
+- Applies a **human-readable mapping** for emotional states and context
+- Delivers a structured intervention card (personalized insight, pattern explanation, reframe, action, **plant suggestion**, and optional **breathing exercise**)
 
-**AI for detection, rules for therapy** — not a generic chatbot.
+**AI for detection and structured generation** — leveraging local LLMs for therapeutic reframing.
 
 ---
 
-## 2. Three-layer architecture
+## 2. Three-layer Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                     LAYER 3: INTERVENTION LAYER (Flutter / API)              │
-│  Explanation • Reframe • Exercise • Plant suggestion • Breathing (optional) │
+│                     LAYER 3: INTERVENTION LAYER (LLM / Flutter)              │
+│  Personalized Insight • Balanced Reframe • Action Step • Plant Suggestion     │
 └─────────────────────────────────────────────────────────────────────────────┘
                                         ▲
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                  LAYER 2: CBT LOGIC ENGINE (Rule-based, deterministic)        │
-│  Flutter: cbt_mapping.dart  │  API: cbt_engine.py                            │
+│                  LAYER 2: MAPPING & CONTEXT (Semantic Translation)           │
+│  Transforms raw labels into human-friendly "Emotional States" (e.g. Decision Anxiety) │
 └─────────────────────────────────────────────────────────────────────────────┘
                                         ▲
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │                     LAYER 1: DETECTION (ML)                                  │
-│  Distortion: fine-tuned classifier (numeric label + confidence)              │
-│  Emotion: pretrained Hugging Face text-classification (label + confidence)    │
+│  Distortion: Fine-tuned DistilBERT classifier                                │
+│  Emotion: Pretrained GoEmotions model                                       │
 └─────────────────────────────────────────────────────────────────────────────┘
                                         ▲
 ┌─────────────────────────────────────────────────────────────────────────────┐
@@ -38,106 +38,94 @@ Mind Heaven is a **CBT-based, journal-first** mental wellness app that:
 
 ---
 
-## 3. Layer 1 — Detection
+## 3. Layer 1 — Detection (ML)
 
-### Journal (text)
+The system uses two specialized models for initial analysis:
 
-| Output | Source (typical) |
-|--------|-------------------|
-| Distortion **label**, **confidence**, optional **class id** | Your trained model (API) or mock heuristics (local) |
-| Emotion **label**, **confidence** | Hugging Face pretrained model (API) or mock (local) |
-
-Semantic classification is the target for production; mocks exist for UI development without GPUs.
+| Component | Model Type | Output |
+|-----------|------------|--------|
+| **Distortion** | Fine-tuned DistilBERT | Label (e.g. 'all-or-nothing') + Confidence |
+| **Emotion** | GoEmotions DistilRoBERTa | Raw Label (e.g. 'nervousness') + Confidence |
 
 ---
 
-## 4. Layer 2 — CBT engine
+## 4. Layer 2 — Mapping & Context
 
-- **Flutter:** Full distortion-type table in `lib/core/cbt_engine/cbt_mapping.dart` (`DistortionType` enum).
-- **API:** `backend/app/services/cbt_engine.py` produces API-safe structured text using distortion label + confidence + emotion.
+Raw detection results are passed through a mapping engine to make them user-friendly:
 
-Principles: clinical alignment, fixed mappings, no uncontrolled generative therapy text.
-
----
-
-## 5. Layer 3 — Intervention
-
-Combines detection outputs + CBT row into a single **`CBTIntervention`** (and journal persistence). Plant lines come from **`PlantSuggestionDatabase`** (app) / **`plant_database.py`** (backend).
+- **Context Detection:** Analyzes text for keywords related to **Social**, **Performance**, or **Health** contexts.
+- **Emotional State Mapping:** Combines raw emotion + context to produce states like "Social Anxiety" or "Work Pressure".
+- **Safety Logic:** Determines if a **Breathing Exercise** card should be shown (Intensity ≥ 70%).
 
 ---
 
-## 6. Application navigation
+## 5. Layer 3 — Intervention (LLM)
 
-```
-Splash → Onboarding → Welcome → Auth → Main App (bottom navigation)
-```
+The mapped states and detected distortions are fed into a local LLM (**Ollama / Llama 3.2**) to generate the final intervention:
 
-| Tab | Role |
-|-----|------|
-| **Journal** | Text → analysis → intervention → save entry |
-| **Insights** | Analytics from stored journal entries |
-| **Learn CBT** | Educational content |
-| **Profile** | Settings / profile |
+- **Insight:** A single sentence validating the user's feelings.
+- **Pattern Explanation:** A one-line clinical explanation of the detected distortion.
+- **Reframe:** A 3-4 line CBT-aligned balanced alternative thought.
+- **Action:** A small, concrete step the user can take.
+- **Plant Suggestion:** Injected based on the emotional group.
 
 ---
 
-## 7. Clean architecture (Flutter)
+## 6. Clean Architecture (Flutter)
+
+The Flutter app follows a modified clean architecture using the **Provider** package for state management.
 
 ```
 lib/
-├── main.dart
-├── domain/repositories/       # JournalRepository contract
+├── app/
+│   ├── bootstrap.dart          # Dependency injection & initialization
+│   └── app.dart               # MultiProvider & MaterialApp setup
+├── domain/repositories/        # Repository contracts
 ├── data/
-│   ├── repositories/          # JournalRepositoryImpl (local vs remote)
-│   └── remote/                # JournalRemoteDataSource → FastAPI
-├── app/app_providers.dart      # Riverpod dependency providers
-├── presentation/providers/     # Riverpod controllers/states
+│   ├── repositories/           # Repository implementations (Remote/Local toggle)
+│   └── remote/                 # FastAPI data source
+├── presentation/providers/      # ChangeNotifier providers (Journal, Insights)
 ├── core/
-│   ├── config/                 # API_BASE_URL (dart-define)
-│   ├── network/                # ApiClient
-│   ├── detection/              # Local mock classifiers (optional / dev)
-│   ├── cbt_engine/             # cbt_mapping.dart, plant_suggestion_database.dart
-│   └── intervention/         # intervention_builder.dart
-├── models/
-├── services/                   # storage, analytics
-└── screens/
+│   ├── config/                  # API config
+│   ├── mapping/                 # Local mapping logic (if fallback used)
+│   └── network/                 # ApiClient
+├── services/                    # Auth, Storage, Analytics, Firebase
+└── screens/                     # UI implementation
 ```
 
-**Backend (separate deployable):**
+---
+
+## 7. Backend Architecture (FastAPI)
+
+The backend is organized into services for modularity:
 
 ```
 backend/app/
-├── main.py
-├── schemas.py
-├── config.py
+├── main.py                     # Entrypoint & API routes
+├── utils.py                    # Shared AI utilities (Ollama calls, extraction)
 └── services/
-    ├── distortion_service.py   # Transformers folder + id→label map
-    ├── emotion_service.py      # Hugging Face pipeline
-    ├── cbt_engine.py
-    └── plant_database.py
+    ├── distortion_service.py   # Distortion model loading & prediction
+    ├── emotion_service.py      # Emotion model loading & prediction
+    ├── emotional_state_mapper.py # Raw → Human-readable state mapping
+    ├── context_detector.py     # Context keyword analysis
+    └── reframe_pipeline.py     # Orchestrates the LLM response generation
 ```
 
 ---
 
-## 8. Data flow summary
+## 8. Data Flow Summary
 
-**Journal (local):**  
-Text → `InterventionBuilder` → mock distortion/emotion → `CBTMapping.getIntervention` → UI → `StorageService`.
-
-**Journal (remote):**  
-Text → `POST /analyze/journal` → JSON → `CBTIntervention` → UI → `StorageService`.
-
-**Insights:**  
-Stored entries → `AnalyticsService` → `insightsControllerProvider` → UI.
+1.  **User submits journal** text.
+2.  **FastAPI** receives text, runs **Layer 1** (ML models).
+3.  Results passed to **Layer 2** for context mapping and state translation.
+4.  Mapped data + text sent to **Layer 3** (Ollama) with a structured prompt.
+5.  **Ollama** returns JSON; FastAPI injects plant suggestion and breathing flag.
+6.  **Flutter** receives the final object, saves it to **Firestore/Local Storage**, and displays the **Reframe Output Screen**.
 
 ---
 
-## 9. Model strategy (academic)
+## 9. Academic Positioning
 
-| Component | Approach |
-|-----------|----------|
-| **Distortion** | Your fine-tuned classifier; outputs class index + probability |
-| **Emotion** | Published pretrained HF model + light label normalization |
-| **CBT content** | Rule-based; defensible and consistent |
-
-This document reflects the **current** codebase (journal-first, optional FastAPI, no multimodal check-in in app).
+- **Clinically Rooted:** Uses established CBT distortions as the foundation.
+- **Modern AI:** Combines specialized classification (fast/cheap) with generative LLMs (rich/personalized).
+- **Safety-First:** Uses deterministic mapping for emotional states to ensure therapeutic consistency.
