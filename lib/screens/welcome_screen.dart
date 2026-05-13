@@ -10,7 +10,7 @@ class WelcomeScreen extends StatefulWidget {
 }
 
 class _WelcomeScreenState extends State<WelcomeScreen> {
-  static const String _heroAsset = 'assets/logo/reframed logo.png';
+  static const String _heroAsset = 'assets/logo/reframed_logo.png';
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +27,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                 'Welcome to',
                 style: TextStyle(
                   color: Colors.white,
-                  fontSize: 16,
+                  fontSize: 32,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -41,12 +41,12 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
               ),
               const SizedBox(height: 40),
               const Text(
-                'Guided journaling backed\nby science',
+                'AI-powered journaling to help you\nfeel more balanced.',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: Colors.white,
-                  fontSize: 26,
-                  fontWeight: FontWeight.w700,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
                   height: 1.3,
                 ),
               ),
